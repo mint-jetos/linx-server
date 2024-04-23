@@ -11,12 +11,8 @@
         "templates": {
           "include": ["templates"]
         },
-        "env": {
-          "FILESPATH": "/data/files",
-          "METAPATH": "/data/meta"
-        },
         "port": 8080,
-        "entrypoint": ["linx-server", "-bind=0.0.0.0:8080", "-filespath=/data/files/", "-metapath=/data/meta/"]
+        "entrypoint": ["linx-server""]
       }
     }
   ]
