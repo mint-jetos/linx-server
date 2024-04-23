@@ -17,8 +17,10 @@
         },
         "port": 8080,
         "entrypoint": ["linx-server", "-bind=0.0.0.0:8080", "-filespath=/data/files/", "-metapath=/data/meta/"]
-      },
-      "build": "mkdir -p /data/files && mkdir -p /data/meta && chown -R 65534:65534 /data && go build -o linx-server ."
+      }
     }
-  ]
+  ],
+  "hooks": {
+    "build:start": "mkdir -p /data/files && mkdir -p /data/meta && chown -R 65534:65534 /data"
+  }
 }
