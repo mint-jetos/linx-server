@@ -2,7 +2,7 @@
   "version": 2,
   "builds": [
     {
-      "src": ".",
+      "src": "./linx-server",
       "use": "@vercel/go",
       "config": {
         "static": {
