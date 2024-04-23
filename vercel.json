@@ -6,10 +6,10 @@
       "use": "@vercel/go",
       "config": {
         "static": {
-          "include": ["static"]
+          "include": ["./static/**/*"]
         },
         "templates": {
-          "include": ["templates"]
+          "include": ["./templates/**/*"]
         },
         "port": 8080,
         "entrypoint": ["linx-server"]
