@@ -1,21 +1,6 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "./linx-server",
-      "use": "@vercel/go",
-      "config": {
-        "static": {
-          "include": ["./static/**/*"]
-        },
-        "templates": {
-          "include": ["./templates/**/*"]
-        },
-        "env": {
-          "PORT": 8080
-        },
-        "entrypoint": ["linx-server"]
-      }
-    }
-  ]
+  "env": {
+    "VERCEL_APP_IMAGE": "andreimarcu/linx-server"
+  }
 }
