@@ -1,16 +1,9 @@
-
+{
   "version": 2,
   "builds": [
     {
       "src": ".",
-      "use": "@vercel/go",
-      "config": {
-        "goos": "linux",
-        "goarch": "amd64",
-        "goarm": "",
-        "gomips": "",
-        "goversion": "1.14"
-      }
+      "use": "@vercel/go"
     }
   ]
 }
