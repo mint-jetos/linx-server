@@ -19,5 +19,12 @@
         "entrypoint": ["linx-server", "-bind=0.0.0.0:8080", "-filespath=/data/files/", "-metapath=/data/meta/"]
       }
     }
-  ]
+  ],
+  "scripts": {
+    "build": [
+      "mkdir -p /data/files",
+      "mkdir -p /data/meta",
+      "chown -R 65534:65534 /data"
+    ]
+  }
 }
