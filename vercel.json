@@ -2,8 +2,9 @@
   "version": 2,
   "builds": [
     {
-      "src": "./",
-      "use": "@vercel/go"
+      "src": ".",
+      "use": "@vercel/go",
+      "config": {}
     }
   ]
 }
