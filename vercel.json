@@ -12,7 +12,7 @@
           "include": ["templates"]
         },
         "port": 8080,
-        "entrypoint": ["linx-server""]
+        "entrypoint": ["linx-server"]
       }
     }
   ]
