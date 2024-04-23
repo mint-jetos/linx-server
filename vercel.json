@@ -11,7 +11,9 @@
         "templates": {
           "include": ["./templates/**/*"]
         },
-        "port": 8080,
+        "env": {
+          "PORT": 8080
+        },
         "entrypoint": ["linx-server"]
       }
     }
