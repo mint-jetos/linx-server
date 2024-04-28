@@ -2,14 +2,13 @@
   "version": 2,
   "builds": [
     {
-      "src": ".",
+      "src": "./",
       "use": "@vercel/static-build",
       "config": {
         "go": {
           "version": "1.17"
         }
-      },
-      "buildScript": "build.sh"
+      }
     }
   ]
 }
