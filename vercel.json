@@ -2,18 +2,13 @@
   "version": 2,
   "builds": [
     {
-      "src": "server.go",
-      "use": "@vercel/go",
+      "src": ".",
+      "use": "@vercel/static-build",
       "config": {
-        "goos": "linux",
-        "goarch": "amd64"
+        "go": {
+          "version": "1.17"
+        }
       }
-    }
-  ],
-  "routes": [
-    {
-      "src": "/",
-      "dest": "server"
     }
   ]
 }
