@@ -1,4 +1,4 @@
-module github.com/andreimarcu/linx-server
+module github.com/mint-jetos/linx-server
 
 go 1.14
 
