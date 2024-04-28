@@ -2,11 +2,11 @@
   "version": 2,
   "builds": [
     {
-      "src": "*.go",
+      "src": "server.go",
       "use": "@vercel/go",
       "config": {
         "go": {
-          "version": "1.17"
+          "version": "1.14"
         },
         "copyFiles": [
           {
