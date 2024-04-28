@@ -1,6 +1,19 @@
 {
   "version": 2,
-  "env": {
-    "VERCEL_APP_IMAGE": "andreimarcu/linx-server"
-  }
+  "builds": [
+    {
+      "src": "server.go",
+      "use": "@vercel/go",
+      "config": {
+        "goos": "linux",
+        "goarch": "amd64"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/",
+      "dest": "server"
+    }
+  ]
 }
