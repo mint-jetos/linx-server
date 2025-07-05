@@ -1,9 +1,9 @@
 # 1️⃣ Clone the repository
-git clone https://github.com/andreimarcu/linx-server.git
+git clone https://github.com/mint-jetos/linx-server.git
 cd linx-server
 
 # 2️⃣ Initialize Go modules
-go mod init github.com/andreimarcu/linx-server
+go mod init github.com/mint-jetos/linx-server
 go mod tidy
 
 # 3️⃣ Install rice tool (used for embedding assets)
@@ -25,5 +25,6 @@ rice append --exec linx-server
 cp linx-server.conf.example linx-server.conf
 ./linx-server -config linx-server.conf
 
+# Clean up Go Cache
 #go clean -modcache
 #rm -rf ~/go
