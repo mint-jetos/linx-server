@@ -11,6 +11,13 @@ import (
 func strictReferrerCheck(r *http.Request, prefix string, whitelistHeaders []string) bool {
 	p, _ := url.Parse(prefix)
 
+	// 20250705 --------------------- START ------------------------------------------------------------
+	// If X-Real-IP or X-Forwarded-For is present, assume it's a trusted proxy and bypass referrer check
+	if r.Header.Get("X-Real-IP") != "" || r.Header.Get("X-Forwarded-For") != "" {
+		return true
+	}
+	// 20250705 --------------------- END  ------------------------------------------------------------
+	
 	// if there's an Origin header, check it and skip other checks
 	if origin := r.Header.Get("Origin"); origin != "" {
 		u, _ := url.Parse(origin)
