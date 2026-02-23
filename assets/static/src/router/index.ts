@@ -26,9 +26,11 @@ const router = createRouter({
       path: "/api",
       name: "API",
       component: () => import("../views/APIView.vue"),
-      meta: {
-        navigation: true,
-      },
+    },
+    {
+      path: "/admin",
+      name: "Admin",
+      component: UploadView,
     },
     {
       path: "/:filename(.*)",

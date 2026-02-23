@@ -170,7 +170,7 @@ export const useUploadStore = defineStore(
           saveOriginalName,
           canceledByUserText: "Canceled by user",
           request: async () =>
-            await axios.post(ApiPath(`/upload`), form, {
+            await axios.post(ApiPath(`/`), form, {
               headers: {
                 Accept: "application/json",
                 "Linx-Api-Key": encodeURIComponent(config.apiKey),

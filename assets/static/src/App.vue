@@ -32,21 +32,7 @@
             </TooltipTrigger>
             <TooltipContent>Change to {{ nextMode }} mode</TooltipContent>
           </Tooltip>
-          <Tooltip>
-            <TooltipTrigger as-child>
-              <Button
-                as="a"
-                variant="ghost"
-                href="https://github.com/gabe565/linx-server"
-                target="_blank"
-                class="rounded-full"
-              >
-                <GitHubIcon />
-                <span class="sr-only">View source on GitHub</span>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>View source on GitHub</TooltipContent>
-          </Tooltip>
+
         </div>
       </header>
 
@@ -81,7 +67,7 @@ import { useConfigStore } from "@/stores/config.js";
 import DarkIcon from "~icons/material-symbols/brightness-2-rounded";
 import LightIcon from "~icons/material-symbols/brightness-5-rounded";
 import AutoIcon from "~icons/material-symbols/brightness-auto-rounded";
-import GitHubIcon from "~icons/simple-icons/github";
+
 
 const config = useConfigStore();
 

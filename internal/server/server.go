@@ -52,24 +52,6 @@ func Setup() (*chi.Mux, error) {
 	// Routing setup
 	r := chi.NewRouter()
 	r.Use(middleware.RequestID)
-	r.Use(func(next http.Handler) http.Handler {
-		redirectSlashes := middleware.RedirectSlashes(next)
-		fn := func(w http.ResponseWriter, r *http.Request) {
-			if r.URL.Path == path.Join(config.Default.SiteURL.Path, "upload")+"/" {
-				r.URL.Path = strings.TrimSuffix(r.URL.Path, "/")
-			}
-
-			switch {
-			case r.URL.Path == config.Default.SiteURL.Path:
-				next.ServeHTTP(w, r)
-			case r.URL.Path == strings.TrimSuffix(config.Default.SiteURL.Path, "/"):
-				http.Redirect(w, r, config.Default.SiteURL.String(), http.StatusPermanentRedirect)
-			default:
-				redirectSlashes.ServeHTTP(w, r)
-			}
-		}
-		return http.HandlerFunc(fn)
-	})
 	if config.Default.SiteURL.Path != "/" {
 		r.Use(middleware.StripPrefix(strings.TrimSuffix(config.Default.SiteURL.Path, "/")))
 	}
@@ -117,7 +99,7 @@ func Setup() (*chi.Mux, error) {
 		r.Post("/api/auth", func(w http.ResponseWriter, _ *http.Request) {
 			_, _ = w.Write([]byte("Authorized"))
 		})
-		r.Post("/upload", upload.POSTHandler)
+		r.Post("/", upload.POSTHandler)
 		r.Put("/upload", upload.PUTHandler)
 		r.Put("/upload/{name}", upload.PUTHandler)
 		if config.Default.RemoteUploads {
