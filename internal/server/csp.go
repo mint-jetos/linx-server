@@ -58,11 +58,19 @@ func GenerateCSP() string {
 		panic(err)
 	}
 
-	defaultSrc := util.SubresourceIntegrity(conf)
+	// Get existing subresource integrity hashes
+	scriptHashes := util.SubresourceIntegrity(conf)
 
+	// Add the hash for the clock's inline script
+	scriptHashes += " 'sha256-Hep3Yg/R4pueD08KZ3zA6GOguM36YbqS+46Z1yEpjKU='"
+
+	// If Vite URL is present, add it to script-src
 	if u := config.Default.ViteURL; u != "" {
-		defaultSrc += " " + u + " ws:"
+		scriptHashes += " " + u + " ws:"
 	}
 
-	return strings.Replace(DefaultCSP, defaultSrcKey, defaultSrc, 1)
+	// Replace the defaultSrcKey with all the script hashes
+	csp := strings.Replace(DefaultCSP, defaultSrcKey, scriptHashes, 1)
+
+	return csp
 }

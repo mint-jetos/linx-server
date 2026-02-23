@@ -157,6 +157,9 @@ func Setup() (*chi.Mux, error) {
 		http.ServeContent(w, r, "config.json", config.TimeStarted, bytes.NewReader(b))
 	})
 
+	// ClockHandler for the root path
+	r.Get("/", handlers.ClockHandler)
+
 	for _, p := range append(customPages, "Paste", "API") {
 		r.Get("/"+strings.ToLower(p), handlers.AssetHandler(template.WithTitle(p)))
 	}
