@@ -209,7 +209,7 @@ export const useUploadStore = defineStore(
         file,
         saveOriginalName,
         request: async () =>
-          await axios.put(ApiPath(`/upload/${encodeURIComponent(filename)}`), file, {
+          await axios.put(ApiPath(`/${encodeURIComponent(filename)}`), file, {
             headers: {
               Accept: "application/json",
               "Content-Type": "application/octet-stream",

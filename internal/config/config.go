@@ -53,8 +53,9 @@ type TLS struct {
 type Auth struct {
 	CookieExpiry Duration `toml:"cookie-expiry" comment:"Expiration time for access key cookies (set to 0s to use session cookies)"`
 	Basic        bool     `toml:"basic"         comment:"Allow logging in with basic auth password"`
-	File         string   `toml:"file"          comment:"Path to a file containing newline-separated scrypted auth keys"`
-	RemoteFile   string   `toml:"remote-file"   comment:"Path to a file containing newline-separated scrypted auth keys for remote uploads"`
+	File              string   `toml:"file"          comment:"Path to a file containing newline-separated scrypted auth keys"`
+	RemoteFile        string   `toml:"remote-file"   comment:"Path to a file containing newline-separated scrypted auth keys for remote uploads"`
+	AdminPasswordHash string   `toml:"admin-password-hash" comment:"SHA256 hash of the password for the /admin page"`
 }
 
 type S3 struct {
@@ -106,6 +107,9 @@ func New() *Config {
 			ReferrerPolicy:     "same-origin",
 			FileReferrerPolicy: "same-origin",
 			XFrameOptions:      "SAMEORIGIN",
+		},
+		Auth: Auth{
+			AdminPasswordHash: "9b8769a4a742959a2d0298c36fb70623f2dfacda8436237df08d8dfd5b37374c", // Hash for "pass123"
 		},
 	}
 	if os.Getenv("LINX_DEFAULTS") == "container" {

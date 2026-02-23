@@ -61,8 +61,8 @@ func GenerateCSP() string {
 	// Get existing subresource integrity hashes
 	scriptHashes := util.SubresourceIntegrity(conf)
 
-	// Add the hash for the clock's inline script
-	scriptHashes += " 'sha256-Hep3Yg/R4pueD08KZ3zA6GOguM36YbqS+46Z1yEpjKU='"
+	// Add the hashes for the clock's inline script and the admin auth page's inline script
+	scriptHashes += " 'sha256-Hep3Yg/R4pueD08KZ3zA6GOguM36YbqS+46Z1yEpjKU=' 'sha256-8yIGnmTVwzlut2zBWAxN7TDgLdy4aF4DAd0xm7i2I9A='"
 
 	// If Vite URL is present, add it to script-src
 	if u := config.Default.ViteURL; u != "" {

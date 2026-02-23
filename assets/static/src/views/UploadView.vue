@@ -2,23 +2,28 @@
   <div class="container flex flex-col justify-center gap-6 max-w-2xl mx-auto" v-bind="$attrs">
     <Card>
       <CardHeader>
-        <CardTitle>Upload</CardTitle>
+        <CardTitle>{{ ui.activeRootView === 'upload' ? 'Upload' : 'Paste' }}</CardTitle>
       </CardHeader>
 
       <CardContent class="flex flex-col gap-4">
-        <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
-          <Label v-if="!config.site?.force_random">
-            <Switch v-model="config.randomFilename" />
-            Random filename
-          </Label>
-          <PasswordInput v-model="config.password" class="sm:flex-1" />
-          <ExpirySelect
-            v-model="config.expiry"
-            :options="config.site?.expiration_times"
-            class="w-full sm:w-40"
-          />
+        <div v-if="ui.activeRootView === 'upload'">
+          <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <Label v-if="!config.site?.force_random">
+              <Switch v-model="config.randomFilename" />
+              Random filename
+            </Label>
+            <PasswordInput v-model="config.password" class="sm:flex-1" />
+            <ExpirySelect
+              v-model="config.expiry"
+              :options="config.site?.expiration_times"
+              class="w-full sm:w-40"
+            />
+          </div>
+          <DropZone @upload="doUpload" :max-file-size="config.site?.max_size" />
         </div>
-        <DropZone @upload="doUpload" :max-file-size="config.site?.max_size" />
+        <div v-else-if="ui.activeRootView === 'paste'">
+          <PasteView />
+        </div>
       </CardContent>
     </Card>
 
@@ -41,9 +46,12 @@ import PasswordInput from "@/components/upload/PasswordInput.vue";
 import UploadList from "@/components/upload/UploadList.vue";
 import { useConfigStore } from "@/stores/config.ts";
 import { useUploadStore } from "@/stores/upload.ts";
+import { useUIStore } from "@/stores/ui.ts"; // Import useUIStore
+import PasteView from "./PasteView.vue"; // Import PasteView
 
 const config = useConfigStore();
 const uploads = useUploadStore();
+const ui = useUIStore(); // Access the ui store
 const showAuth = ref(false);
 let retryFile: File | undefined;
 

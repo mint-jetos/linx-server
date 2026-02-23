@@ -10,17 +10,22 @@
           </Button>
         </div>
 
-        <NavigationMenu class="justify-self-center">
-          <NavigationMenuList>
-            <NavigationMenuItem v-for="route in routes" :key="route.name">
-              <RouterLink :to="route.path" custom v-slot="{ isActive, href, navigate }">
-                <NavigationMenuLink :href="href" @click="navigate" :active="isActive">
-                  {{ route.name }}
-                </NavigationMenuLink>
-              </RouterLink>
-            </NavigationMenuItem>
-          </NavigationMenuList>
-        </NavigationMenu>
+        <div class="justify-self-center flex space-x-2">
+          <Button
+            variant="ghost"
+            :class="{ 'bg-muted': ui.activeRootView === 'upload' }"
+            @click="ui.setActiveRootView('upload')"
+          >
+            Upload
+          </Button>
+          <Button
+            variant="ghost"
+            :class="{ 'bg-muted': ui.activeRootView === 'paste' }"
+            @click="ui.setActiveRootView('paste')"
+          >
+            Paste
+          </Button>
+        </div>
 
         <div class="justify-self-end">
           <Tooltip>
@@ -48,14 +53,8 @@
 <script setup lang="ts">
 import { useColorMode } from "@vueuse/core";
 import { computed } from "vue";
-import { useRouter } from "vue-router";
+
 import { Button } from "@/components/ui/button";
-import {
-  NavigationMenu,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-} from "@/components/ui/navigation-menu";
 import { Toaster } from "@/components/ui/sonner";
 import {
   Tooltip,
@@ -67,23 +66,12 @@ import { useConfigStore } from "@/stores/config.js";
 import DarkIcon from "~icons/material-symbols/brightness-2-rounded";
 import LightIcon from "~icons/material-symbols/brightness-5-rounded";
 import AutoIcon from "~icons/material-symbols/brightness-auto-rounded";
-
+import { useUIStore } from "@/stores/ui.ts"; // Import useUIStore
 
 const config = useConfigStore();
+const ui = useUIStore(); // Initialize ui store
 
-const router = useRouter();
-type NavRoute = { name: string; path: string };
-const routes = computed<NavRoute[]>(() => {
-  const builtins = router
-    .getRoutes()
-    .filter((route) => route.meta?.navigation)
-    .map((route) => ({ name: String(route.name ?? route.path), path: route.path }));
-  const customs = (config.site?.custom_pages || []).map((v: string) => ({
-    name: v,
-    path: `/${v}`,
-  }));
-  return [...builtins, ...customs];
-});
+
 
 const mode = useColorMode({ disableTransition: false, emitAuto: true });
 

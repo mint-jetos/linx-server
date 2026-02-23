@@ -18,6 +18,7 @@ import { useConfigStore } from "@/stores/config.ts";
 import { useUploadStore } from "@/stores/upload.ts";
 import { getExtension } from "@/util/extensions.ts";
 import EditIcon from "~icons/material-symbols/edit-rounded";
+import { useUIStore } from "@/stores/ui.ts"; // Import useUIStore
 
 const props = defineProps({
   meta: { type: Object, required: true },
@@ -27,6 +28,7 @@ const props = defineProps({
 const config = useConfigStore();
 const upload = useUploadStore();
 const router = useRouter();
+const ui = useUIStore(); // Initialize ui store
 
 const edit = () => {
   const existing = upload.uploads.find((item) => item.filename === props.meta.filename);
@@ -38,6 +40,7 @@ const edit = () => {
   config.editTargetFilename = props.meta.filename;
   config.editDeleteKey = existing?.delete_key ?? "";
   config.overwrite = !!existing?.delete_key;
-  router.push({ path: "/paste" });
+  ui.setActiveRootView('paste'); // Set active view to paste
+  router.push("/"); // Navigate to root path
 };
 </script>

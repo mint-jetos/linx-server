@@ -100,8 +100,8 @@ func Setup() (*chi.Mux, error) {
 			_, _ = w.Write([]byte("Authorized"))
 		})
 		r.Post("/", upload.POSTHandler)
-		r.Put("/upload", upload.PUTHandler)
-		r.Put("/upload/{name}", upload.PUTHandler)
+		r.Put("/", upload.PUTHandler) // Changed from /upload
+		r.Put("/{name}", upload.PUTHandler) // Changed from /upload/{name}
 		if config.Default.RemoteUploads {
 			r.Get("/upload", upload.Remote)
 			r.Get("/upload/{name}", upload.Remote)
@@ -139,10 +139,16 @@ func Setup() (*chi.Mux, error) {
 		http.ServeContent(w, r, "config.json", config.TimeStarted, bytes.NewReader(b))
 	})
 
+	// Admin authentication routes
+	r.Get("/admin", handlers.AdminAuthPage)
+	r.Post("/api/admin/auth", handlers.AdminAuthAPI)
+
+
+
 	// ClockHandler for the root path
 	r.Get("/", handlers.ClockHandler)
 
-	for _, p := range append(customPages, "Paste", "API") {
+	for _, p := range append(customPages, "API") {
 		r.Get("/"+strings.ToLower(p), handlers.AssetHandler(template.WithTitle(p)))
 	}
 
