@@ -5,60 +5,15 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"net/http"
-
+	"strings"
 
 	"gabe565.com/linx-server/internal/config"
+	"gabe565.com/linx-server/internal/template"
 )
 
 // AdminAuthPage serves the HTML for the admin authentication page.
 func AdminAuthPage(w http.ResponseWriter, r *http.Request) {
-	// This will be replaced by the Vue frontend later
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	w.WriteHeader(http.StatusOK)
-	_, _ = w.Write([]byte(`<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Login</title>
-</head>
-<body>
-    <h1>Admin Login</h1>
-    <form id="admin-login-form">
-        <input type="password" id="password" placeholder="Password" required>
-        <button type="submit">Login</button>
-    </form>
-    <div id="message"></div>
-
-    <script>
-        document.getElementById('admin-login-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const password = document.getElementById('password').value;
-            const messageDiv = document.getElementById('message');
-
-            try {
-                const response = await fetch('/api/admin/auth', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ password: password }),
-                });
-
-                if (response.ok) {
-                    messageDiv.textContent = 'Login successful! Redirecting...';
-                    window.location.href = '/'; // Redirect to the root page
-                } else {
-                    const errorData = await response.json();
-                    messageDiv.textContent = 'Login failed: ' + errorData.error;
-                }
-            } catch (error) {
-                messageDiv.textContent = 'An error occurred: ' + error.message;
-            }
-        });
-    </script>
-</body>
-</html>`))
+	ServeAsset(w, r, http.StatusOK, template.WithTitle("Admin Login"))
 }
 
 // AdminAuthAPI handles POST requests for admin authentication.
@@ -91,16 +46,25 @@ func AdminAuthAPI(w http.ResponseWriter, r *http.Request) {
 			Value:    "authenticated",
 			Path:     "/",
 			HttpOnly: true,
-			Secure:   true, // Should be true in production with HTTPS
+			Secure:   r.URL.Scheme == "https",
 			SameSite: http.SameSiteLaxMode,
+			MaxAge:   0, // Session cookie, deleted on browser close
 		}
 		http.SetCookie(w, cookie)
+
+		if strings.EqualFold("application/json", r.Header.Get("Accept")) || r.Header.Get("Content-Type") == "application/json" {
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write([]byte(`{"message": "Login successful"}`))
+			return
+		}
 
 		http.Redirect(w, r, "/", http.StatusFound) // Redirect to root
 		return
 	}
 
-	http.Error(w, `{"error": "Invalid password"}`, http.StatusUnauthorized)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusUnauthorized)
+	_, _ = w.Write([]byte(`{"error": "Invalid password"}`))
 }
 
 // AdminAuthMiddleware checks for admin authentication cookie.

@@ -17,7 +17,7 @@ func Index(r *http.Request, opts ...OptionFunc) Node {
 
 	options := Options{
 		Title:       config.Default.SiteName,
-		Description: "Self-hosted file/media sharing website.",
+		Description: "",
 		OpenGraph: map[string]string{
 			OpenGraphSiteName: config.Default.SiteName,
 			OpenGraphURL:      u.String(),

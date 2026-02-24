@@ -13,6 +13,8 @@ import (
 var defaultExpiryList = []time.Duration{
 	time.Minute,
 	5 * time.Minute,
+	15 * time.Minute,
+	30 * time.Minute,
 	time.Hour,
 	24 * time.Hour,
 	7 * 24 * time.Hour,

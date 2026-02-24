@@ -1,6 +1,6 @@
 ## linx-server
 
-Self-hosted file/media sharing website
+
 
 ```
 linx-server [flags]

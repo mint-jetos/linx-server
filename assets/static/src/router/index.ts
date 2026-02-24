@@ -17,8 +17,11 @@ const router = createRouter({
       name: "API",
       component: () => import("../views/APIView.vue"),
     },
-
-
+    {
+      path: "/admin",
+      name: "Admin Login",
+      component: () => import("../views/AdminLoginView.vue"),
+    },
     {
       path: "/:filename(.*)",
       name: "File",

@@ -1,5 +1,5 @@
 [Unit]
-Description=Self-hosted file/code/media sharing website
+Description=Linx Server
 After=network.target
 
 [Service]

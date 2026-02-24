@@ -25,8 +25,7 @@ import (
 func New(options ...cobrax.Option) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "linx-server",
-		Short: "Self-hosted file/media sharing website",
-		Args:  cobra.NoArgs,
+		 		Short: "",		Args:  cobra.NoArgs,
 		RunE:  run,
 
 		ValidArgsFunction: cobra.NoFileCompletions,

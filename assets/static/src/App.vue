@@ -75,7 +75,7 @@ const router = useRouter(); // Initialize router
 
 
 
-const mode = useColorMode({ disableTransition: false, emitAuto: true });
+const mode = useColorMode({ disableTransition: false, emitAuto: true, initialValue: 'dark' });
 
 const nextMode = computed(() => {
   if (mode.value === "auto") return "dark";

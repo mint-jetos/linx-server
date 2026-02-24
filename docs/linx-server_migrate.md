@@ -25,5 +25,5 @@ linx-server migrate [flags]
 
 ### SEE ALSO
 
-* [linx-server](linx-server.md)	 - Self-hosted file/media sharing website
+* [linx-server](linx-server.md)
 

@@ -1,5 +1,5 @@
 [Unit]
-Description=Self-hosted file/code/media sharing (expired files cleanup)
+Description=Expired files cleanup service
 After=network.target
 
 [Service]

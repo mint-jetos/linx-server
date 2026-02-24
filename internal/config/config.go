@@ -86,10 +86,11 @@ func New() *Config {
 		Bind:                  "127.0.0.1:8080",
 		FilesPath:             "data/files",
 		MetaPath:              "data/meta",
-		SiteName:              "Linx",
+		SiteName:              "Home",
 		SelifPath:             "selif",
 		GracefulShutdown:      Duration{30 * time.Second},
-		MaxSize:               4 * bytefmt.GiB,
+		MaxSize:               25 * bytefmt.MiB,
+		MaxExpiry:             Duration{time.Hour},
 		UploadMaxMemory:       32 * bytefmt.MiB,
 		ForceRandomFilename:   true,
 		RandomFilenameLength:  8,
@@ -109,7 +110,7 @@ func New() *Config {
 			XFrameOptions:      "SAMEORIGIN",
 		},
 		Auth: Auth{
-			AdminPasswordHash: "9b8769a4a742959a2d0298c36fb70623f2dfacda8436237df08d8dfd5b37374c", // Hash for "pass123"
+			AdminPasswordHash: "8f78bb11fc277a95a6d83866894d0c85d37cf144eb631d38515d61cdea5e3d86", // Hash for "password"
 		},
 	}
 	if os.Getenv("LINX_DEFAULTS") == "container" {
