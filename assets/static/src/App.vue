@@ -4,7 +4,7 @@
       <header class="grid grid-cols-3 border-b bg-surface px-4 py-2 items-center">
         <div>
           <Button variant="link" class="p-0" as-child>
-            <RouterLink to="/" @click="ui.setActiveRootView('upload')">
+            <RouterLink to="/" @click="ui.setActiveRootView('upload')" :class="{ 'opacity-0 pointer-events-none': ui.isDeadLink }">
               <h1 class="text-2xl font-semibold">{{ config.site.site_name }}</h1>
             </RouterLink>
           </Button>
@@ -52,7 +52,7 @@
 
 <script setup lang="ts">
 import { useColorMode } from "@vueuse/core";
-import { computed } from "vue";
+import { computed, watch } from "vue";
 
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
@@ -73,7 +73,14 @@ const config = useConfigStore();
 const ui = useUIStore(); // Initialize ui store
 const router = useRouter(); // Initialize router
 
-
+watch(
+  () => router.currentRoute.value.name,
+  (routeName) => {
+    // Set to true for 'File' route to prevent flicker, false for others.
+    // DisplayPage will set it to false if the file loads successfully.
+    ui.isDeadLink = routeName === 'File';
+  }
+);
 
 const mode = useColorMode({ disableTransition: false, emitAuto: true, initialValue: 'dark' });
 

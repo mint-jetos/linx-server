@@ -64,7 +64,7 @@
 import Modes from "./fileModes.ts";
 import { useAsyncState } from "@vueuse/core";
 import axios, { isAxiosError } from "axios";
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import { toast } from "vue-sonner";
 import DeadLink from "@/assets/dead-link.svg";
 import FileHeader from "@/components/display/FileHeader.vue";
@@ -82,6 +82,7 @@ import { Input } from "@/components/ui/input/index.js";
 import { Label } from "@/components/ui/label/index.js";
 import { ApiPath } from "@/config/api.ts";
 import { useConfigStore } from "@/stores/config.ts";
+import { useUIStore } from "@/stores/ui.ts"; // Import useUIStore
 import { getExtension, loadLanguage } from "@/util/extensions.ts";
 import SpinnerIcon from "~icons/svg-spinners/ring-resize";
 
@@ -90,6 +91,7 @@ const props = defineProps({
 });
 
 const config = useConfigStore();
+const ui = useUIStore(); // Initialize ui store
 
 document.title = props.filename + " · " + config.site.site_name;
 
@@ -117,7 +119,7 @@ type DisplayState = {
   content: string | null;
 };
 
-const { state, isLoading, error, execute } = useAsyncState<DisplayState>(
+const { state, isLoading, error, execute, isReady } = useAsyncState<DisplayState>(
   async () => {
     downloadAttempts.value += 1;
     let res;
@@ -205,4 +207,11 @@ const message = computed(() => {
   if (isAxiosError(err) && err.response?.data?.error) msg = err.response.data.error;
   return msg;
 });
+
+watch(isReady, (ready) => {
+  if (ready) {
+    ui.isDeadLink = !!error.value;
+  }
+});
+
 </script>

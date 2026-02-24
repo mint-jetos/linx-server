@@ -1,8 +1,6 @@
 package handlers
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
 	"encoding/json"
 	"net/http"
 	"strings"
@@ -32,13 +30,8 @@ func AdminAuthAPI(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Hash the submitted password
-	hasher := sha256.New()
-	hasher.Write([]byte(req.Password))
-	submittedHash := hex.EncodeToString(hasher.Sum(nil))
-
 	// Compare with the stored hash
-	if submittedHash == config.Default.Auth.AdminPasswordHash {
+	if req.Password == config.Default.Auth.AdminPasswordHash {
 		// Set a simple cookie for authentication.
 		// In a real app, you'd use a more secure session management.
 		cookie := &http.Cookie{
