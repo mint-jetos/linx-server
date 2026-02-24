@@ -41,7 +41,7 @@ func AdminAuthAPI(w http.ResponseWriter, r *http.Request) {
 			HttpOnly: true,
 			Secure:   r.URL.Scheme == "https",
 			SameSite: http.SameSiteLaxMode,
-			MaxAge:   0, // Session cookie, deleted on browser close
+			MaxAge:   int(config.Default.Auth.CookieExpiry.Seconds()),
 		}
 		http.SetCookie(w, cookie)
 

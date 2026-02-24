@@ -51,10 +51,11 @@ type TLS struct {
 }
 
 type Auth struct {
-	CookieExpiry Duration `toml:"cookie-expiry" comment:"Expiration time for access key cookies (set to 0s to use session cookies)"`
-	Basic        bool     `toml:"basic"         comment:"Allow logging in with basic auth password"`
+	CookieExpiry      Duration `toml:"cookie-expiry" comment:"Expiration time for access key cookies (set to 0s to use session cookies)"`
+	Basic             bool     `toml:"basic"         comment:"Allow logging in with basic auth password"`
 	File              string   `toml:"file"          comment:"Path to a file containing newline-separated scrypted auth keys"`
 	RemoteFile        string   `toml:"remote-file"   comment:"Path to a file containing newline-separated scrypted auth keys for remote uploads"`
+	AdminPassword     string   `toml:"admin-password"      comment:"Password for the /admin page. If set, this will be hashed and used for authentication."`
 	AdminPasswordHash string   `toml:"admin-password-hash" comment:"SHA256 hash of the password for the /admin page"`
 }
 
@@ -86,7 +87,7 @@ func New() *Config {
 		Bind:                  "127.0.0.1:8080",
 		FilesPath:             "data/files",
 		MetaPath:              "data/meta",
-		SiteName:              "Home",
+		SiteName:              "sync",
 		SelifPath:             "selif",
 		GracefulShutdown:      Duration{30 * time.Second},
 		MaxSize:               25 * bytefmt.MiB,

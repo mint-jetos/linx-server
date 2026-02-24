@@ -1,6 +1,8 @@
 package config
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"os"
 	"strings"
 
@@ -80,5 +82,17 @@ func (c *Config) Load(cmd *cobra.Command) error {
 		return err
 	}
 
-	return k.UnmarshalWithConf("", c, koanf.UnmarshalConf{Tag: "toml"})
+	if err := k.UnmarshalWithConf("", c, koanf.UnmarshalConf{Tag: "toml"}); err != nil {
+		return err
+	}
+
+	if c.Auth.AdminPassword != "" {
+		// PLEASE NOTE: This is NOT a secure way to store passwords.
+		// In a real-world application, you should use a strong, salted hashing algorithm like Argon2 or scrypt.
+		// For this specific application's context, SHA256 is used as specified.
+		hash := sha256.Sum256([]byte(c.Auth.AdminPassword))
+		c.Auth.AdminPasswordHash = hex.EncodeToString(hash[:])
+	}
+
+	return nil
 }
