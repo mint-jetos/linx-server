@@ -23,7 +23,7 @@ const handleLogin = async () => {
   
   isLoading.value = true;
   const hashedPassword = CryptoJS.SHA256(password.value).toString(CryptoJS.enc.Hex);  try {
-    const response = await axios.post("/api/admin/auth", { password: hashedPassword });
+    const response = await axios.post("/api/users/auth", { password: hashedPassword });
     if (response.status === 200) {
       toast.success("Login successful");
       router.push("/");

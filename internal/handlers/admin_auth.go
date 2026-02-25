@@ -66,7 +66,7 @@ func AdminAuthMiddleware(next http.Handler) http.Handler {
 		cookie, err := r.Cookie("admin_auth")
 		if err != nil || cookie.Value != "authenticated" {
 			// If not authenticated, redirect to the admin login page
-			http.Redirect(w, r, "/admin", http.StatusFound)
+			http.Redirect(w, r, "/users", http.StatusFound)
 			return
 		}
 		next.ServeHTTP(w, r)

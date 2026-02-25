@@ -140,8 +140,8 @@ func Setup() (*chi.Mux, error) {
 	})
 
 	// Admin authentication routes
-	r.Get("/admin", handlers.AdminAuthPage)
-	r.Post("/api/admin/auth", handlers.AdminAuthAPI)
+	r.Get("/users", handlers.AdminAuthPage)
+	r.Post("/api/users/auth", handlers.AdminAuthAPI)
 
 
 

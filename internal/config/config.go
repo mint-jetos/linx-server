@@ -55,8 +55,8 @@ type Auth struct {
 	Basic             bool     `toml:"basic"         comment:"Allow logging in with basic auth password"`
 	File              string   `toml:"file"          comment:"Path to a file containing newline-separated scrypted auth keys"`
 	RemoteFile        string   `toml:"remote-file"   comment:"Path to a file containing newline-separated scrypted auth keys for remote uploads"`
-	AdminPassword     string   `toml:"admin-password"      comment:"Password for the /admin page. If set, this will be hashed and used for authentication."`
-	AdminPasswordHash string   `toml:"admin-password-hash" comment:"SHA256 hash of the password for the /admin page"`
+	AdminPassword     string   `toml:"admin-password"      comment:"Password for the /users page. If set, this will be hashed and used for authentication."`
+	AdminPasswordHash string   `toml:"admin-password-hash" comment:"SHA256 hash of the password for the /users page"`
 }
 
 type S3 struct {
@@ -87,7 +87,7 @@ func New() *Config {
 		Bind:                  "127.0.0.1:8080",
 		FilesPath:             "data/files",
 		MetaPath:              "data/meta",
-		SiteName:              "sync",
+		SiteName:              "site",
 		SelifPath:             "selif",
 		GracefulShutdown:      Duration{30 * time.Second},
 		MaxSize:               25 * bytefmt.MiB,
@@ -111,7 +111,7 @@ func New() *Config {
 			XFrameOptions:      "SAMEORIGIN",
 		},
 		Auth: Auth{
-			AdminPasswordHash: "8f78bb11fc277a95a6d83866894d0c85d37cf144eb631d38515d61cdea5e3d86", // Hash for "password"
+			AdminPasswordHash: "1aefd6bd04e7dc0ce548c105717a95be8c649e0f3d598d96e022f0bf2e4296fc", // Hash for "password"
 		},
 	}
 	if os.Getenv("LINX_DEFAULTS") == "container" {

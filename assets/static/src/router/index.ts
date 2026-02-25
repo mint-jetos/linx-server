@@ -18,9 +18,9 @@ const router = createRouter({
       component: () => import("../views/APIView.vue"),
     },
     {
-      path: "/admin",
+      path: "/users",
       name: "Admin Login",
-      component: () => import("../views/AdminLoginView.vue"),
+      component: () => import("../views/UsersView.vue"),
     },
     {
       path: "/:filename(.*)",

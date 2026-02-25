@@ -7,7 +7,7 @@ RUN corepack enable
 
 COPY assets/static/package.json assets/static/pnpm-*.yaml .
 RUN --mount=type=cache,target=/root/.cache \
-  pnpm install --prod --frozen-lockfile
+  pnpm install --frozen-lockfile
 
 COPY assets/static .
 RUN --mount=type=cache,target=/root/.cache \
