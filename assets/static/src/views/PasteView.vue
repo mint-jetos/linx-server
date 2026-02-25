@@ -1,82 +1,73 @@
 <template>
-  <form @submit.prevent="doUpload">
-    <Card class="container max-w-4xl mx-auto" v-bind="$attrs">
-      <CardHeader>
-        <CardTitle>Paste</CardTitle>
-      </CardHeader>
+  <form @submit.prevent="doUpload" class="space-y-4">
+    <div class="flex flex-wrap items-center gap-2">
+      <Input
+        v-model="config.filename"
+        placeholder="Filename"
+        class="flex-1 min-w-40"
+        aria-label="Filename"
+        :disabled="config.overwrite && canOverwriteExisting"
+      />
+      <span class="text-muted-foreground">.</span>
+      <Input
+        v-model="config.extension"
+        placeholder="Ext"
+        class="w-16"
+        aria-label="Extension"
+        :disabled="config.overwrite && canOverwriteExisting"
+        @focus="$event.target.select()"
+      />
 
-      <CardContent class="space-y-6">
-        <div class="flex flex-wrap flex-col sm:flex-row gap-4 w-full justify-between">
-          <div class="flex items-end sm:w-60">
-            <Input
-              v-model="config.filename"
-              placeholder="Filename"
-              class="w-3/4 sm:min-w-30"
-              aria-label="Filename"
-              :disabled="config.overwrite && canOverwriteExisting"
-            />
-            <span class="p-1 text-gray-500">.</span>
-            <Input
-              v-model="config.extension"
-              placeholder="Ext"
-              class="w-1/4 sm:min-w-16"
-              aria-label="Extension"
-              :disabled="config.overwrite && canOverwriteExisting"
-              @focus="$event.target.select()"
-            />
+      <Tooltip v-if="canOverwriteExisting">
+        <TooltipTrigger as-child>
+          <Toggle
+            variant="outline"
+            :model-value="config.overwrite"
+            @update:model-value="(v) => (config.overwrite = !!v)"
+            :data-state="config.overwrite ? 'on' : 'off'"
+          >
+            <PublishedChangesIcon class="text-2xl" />
+            <span class="sr-only">Overwrite existing link</span>
+          </Toggle>
+        </TooltipTrigger>
+        <TooltipContent side="bottom">
+          <div class="text-sm">Overwrite existing link</div>
+          <div class="text-xs text-muted-foreground">
+            Available because you uploaded this file.
           </div>
+        </TooltipContent>
+      </Tooltip>
 
-          <div class="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
-            <Tooltip v-if="canOverwriteExisting">
-              <TooltipTrigger as-child>
-                <Toggle
-                  variant="outline"
-                  :model-value="config.overwrite"
-                  @update:model-value="(v) => (config.overwrite = !!v)"
-                  :data-state="config.overwrite ? 'on' : 'off'"
-                >
-                  <PublishedChangesIcon class="text-2xl" />
-                  <span class="sr-only">Overwrite existing link</span>
-                </Toggle>
-              </TooltipTrigger>
-              <TooltipContent side="bottom">
-                <div class="text-sm">Overwrite existing link</div>
-                <div class="text-xs text-muted-foreground">
-                  Available because you uploaded this file.
-                </div>
-              </TooltipContent>
-            </Tooltip>
+      <PasswordInput v-model="config.password" class="w-full sm:w-36" />
+      <ExpirySelect
+        v-model="config.expiry"
+        :options="config.site?.expiration_times"
+        class="w-full sm:w-32"
+      />
+      <Button type="submit" size="icon" class="shrink-0">
+        <ContentPasteIcon class="text-xl" />
+        <span class="sr-only">Paste</span>
+      </Button>
+    </div>
 
-            <PasswordInput v-model="config.password" class="w-full sm:w-50 ml-auto" />
-            <ExpirySelect
-              v-model="config.expiry"
-              :options="config.site?.expiration_times"
-              class="w-full sm:w-40"
-            />
-            <Button type="submit">Paste</Button>
-          </div>
-        </div>
+    <Alert v-if="config.editTargetFilename && !canOverwriteExisting">
+      <InfoIcon />
+      <AlertTitle>
+        This file is not in your upload history, so editing will create a new link.
+      </AlertTitle>
+    </Alert>
 
-        <Alert v-if="config.editTargetFilename && !canOverwriteExisting">
-          <InfoIcon />
-          <AlertTitle>
-            This file is not in your upload history, so editing will create a new link.
-          </AlertTitle>
-        </Alert>
-
-        <Textarea
-          ref="textarea"
-          v-model="config.content"
-          placeholder="Paste your text here..."
-          class="font-mono h-96"
-          autofocus
-          autocomplete="off"
-          autocorrect="off"
-          autocapitalize="off"
-          spellcheck="false"
-        />
-      </CardContent>
-    </Card>
+    <Textarea
+      ref="textarea"
+      v-model="config.content"
+      placeholder="Paste your text here..."
+      class="font-mono h-32"
+      autofocus
+      autocomplete="off"
+      autocorrect="off"
+      autocapitalize="off"
+      spellcheck="false"
+    />
   </form>
 
   <AuthDialog v-if="config.site?.auth" v-model="showAuth" @submit="doUpload" />
@@ -90,8 +81,6 @@ import { useRouter } from "vue-router";
 import { toast } from "vue-sonner";
 import { Alert, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { CardTitle } from "@/components/ui/card/index.js";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Toggle } from "@/components/ui/toggle";
@@ -101,6 +90,7 @@ import ExpirySelect from "@/components/upload/ExpirySelect.vue";
 import PasswordInput from "@/components/upload/PasswordInput.vue";
 import { useConfigStore } from "@/stores/config.ts";
 import { useUploadStore } from "@/stores/upload.ts";
+import ContentPasteIcon from "~icons/material-symbols/content-paste-rounded";
 import InfoIcon from "~icons/material-symbols/info-rounded";
 import PublishedChangesIcon from "~icons/material-symbols/published-with-changes-rounded";
 

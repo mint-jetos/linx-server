@@ -1,11 +1,15 @@
 <template>
-  <div class="container flex flex-col justify-center gap-6 max-w-2xl mx-auto" v-bind="$attrs">
+  <div
+    :class="
+      cn(
+        'container flex flex-col justify-center gap-6 mx-auto transition-all duration-300',
+        ui.activeRootView === 'paste' ? 'max-w-4xl' : 'max-w-2xl',
+      )
+    "
+    v-bind="$attrs"
+  >
     <Card>
-      <CardHeader>
-        <CardTitle>{{ ui.activeRootView === 'upload' ? 'Upload' : 'Paste' }}</CardTitle>
-      </CardHeader>
-
-      <CardContent class="flex flex-col gap-4">
+      <CardContent class="flex flex-col gap-4 pt-6">
         <div v-if="ui.activeRootView === 'upload'">
           <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
             <Label v-if="!config.site?.force_random">
@@ -36,7 +40,7 @@
 <script setup lang="ts">
 import { isAxiosError } from "axios";
 import { ref } from "vue";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card/index.js";
+import { Card, CardContent } from "@/components/ui/card/index.js";
 import { Label } from "@/components/ui/label/index.js";
 import { Switch } from "@/components/ui/switch/index.js";
 import AuthDialog from "@/components/upload/AuthDialog.vue";
@@ -44,6 +48,7 @@ import DropZone from "@/components/upload/DropZone.vue";
 import ExpirySelect from "@/components/upload/ExpirySelect.vue";
 import PasswordInput from "@/components/upload/PasswordInput.vue";
 import UploadList from "@/components/upload/UploadList.vue";
+import { cn } from "@/lib/utils";
 import { useConfigStore } from "@/stores/config.ts";
 import { useUploadStore } from "@/stores/upload.ts";
 import { useUIStore } from "@/stores/ui.ts"; // Import useUIStore
