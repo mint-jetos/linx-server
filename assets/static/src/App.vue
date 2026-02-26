@@ -41,7 +41,7 @@
         </div>
       </header>
 
-      <main class="flex-1 content-center p-6">
+      <main class="flex-1 p-6">
         <router-view />
       </main>
     </TooltipProvider>

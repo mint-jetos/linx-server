@@ -2,8 +2,8 @@
   <div
     :class="
       cn(
-        'container flex flex-col justify-center gap-6 mx-auto transition-all duration-300',
-        ui.activeRootView === 'paste' ? 'max-w-4xl' : 'max-w-2xl',
+        'container flex flex-col gap-6 mx-auto px-4 transition-all duration-300',
+        ui.activeRootView === 'paste' ? 'max-w-8xl' : 'max-w-8xl',
       )
     "
     v-bind="$attrs"
@@ -23,7 +23,7 @@
               class="w-full sm:w-40"
             />
           </div>
-          <DropZone @upload="doUpload" :max-file-size="config.site?.max_size" />
+          <DropZone @upload="doUpload" :max-file-size="config.site?.max_size" class="mt-4" />
         </div>
         <div v-else-if="ui.activeRootView === 'paste'">
           <PasteView />

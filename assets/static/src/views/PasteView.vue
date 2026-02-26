@@ -37,7 +37,7 @@
         :options="config.site?.expiration_times"
         class="w-full sm:w-24"
       />
-      <Button type="submit" size="icon" class="shrink-0">
+      <Button type="submit" size="icon" class="shrink-0" :disabled="isSubmitDisabled">
         <ContentPasteIcon class="text-xl" />
         <span class="sr-only">Paste</span>
       </Button>
@@ -54,7 +54,7 @@
       ref="textarea"
       v-model="config.content"
       placeholder="Paste your text here..."
-      class="font-mono h-32"
+      class="font-mono h-50"
       autofocus
       autocomplete="off"
       autocorrect="off"
@@ -92,6 +92,10 @@ const upload = useUploadStore();
 const router = useRouter();
 const showAuth = ref(false);
 const canOverwriteExisting = computed(() => !!config.editTargetFilename && !!config.editDeleteKey);
+
+const isSubmitDisabled = computed(() => {
+  return !config.content;
+});
 
 const doUpload = async () => {
   let finalFilename = config.filename;

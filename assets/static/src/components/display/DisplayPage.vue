@@ -1,5 +1,5 @@
 <template>
-  <div class="container mx-auto" :class="[errorStatus === 401 ? 'max-w-lg' : 'max-w-5xl']">
+  <div class="container mx-auto max-w-8xl">
     <div v-if="isLoading" class="animate-in fade-in duration-1000 flex flex-col items-center">
       <SpinnerIcon class="text-4xl" />
     </div>
