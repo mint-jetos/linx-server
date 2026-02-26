@@ -13,7 +13,7 @@ const props = defineProps({
   filename: { type: String, required: true },
 });
 
-document.title = props.filename + " · " + useConfigStore().site.site_name;
+document.title = useConfigStore().site.site_name;
 
 const config = useConfigStore();
 const isCustom = computed(() => config.site?.custom_pages?.includes(props.filename));

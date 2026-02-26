@@ -1,22 +1,15 @@
 <template>
   <form @submit.prevent="doUpload" class="space-y-4">
-    <div class="flex flex-wrap items-center gap-2">
+    <div class="flex flex-row items-center gap-2">
+
       <Input
         v-model="config.filename"
-        placeholder="Filename"
-        class="flex-1 min-w-40"
+        placeholder="my_file.txt"
+        class="w-full sm:flex-1"
         aria-label="Filename"
         :disabled="config.overwrite && canOverwriteExisting"
       />
-      <span class="text-muted-foreground">.</span>
-      <Input
-        v-model="config.extension"
-        placeholder="Ext"
-        class="w-16"
-        aria-label="Extension"
-        :disabled="config.overwrite && canOverwriteExisting"
-        @focus="$event.target.select()"
-      />
+
 
       <Tooltip v-if="canOverwriteExisting">
         <TooltipTrigger as-child>
@@ -38,11 +31,11 @@
         </TooltipContent>
       </Tooltip>
 
-      <PasswordInput v-model="config.password" class="w-full sm:w-36" />
+      <PasswordInput v-model="config.password" class="w-full sm:flex-1" />
       <ExpirySelect
         v-model="config.expiry"
         :options="config.site?.expiration_times"
-        class="w-full sm:w-32"
+        class="w-full sm:w-24"
       />
       <Button type="submit" size="icon" class="shrink-0">
         <ContentPasteIcon class="text-xl" />
@@ -101,7 +94,17 @@ const showAuth = ref(false);
 const canOverwriteExisting = computed(() => !!config.editTargetFilename && !!config.editDeleteKey);
 
 const doUpload = async () => {
-  const file = new File([config.content], config.filename + "." + config.extension);
+  let finalFilename = config.filename;
+  const defaultExtension = config.extension || 'txt'; // Use stored default or fallback to 'txt'
+
+  const lastDotIndex = finalFilename.lastIndexOf('.');
+  // If no dot is found, or the dot is at the beginning (hidden file), or ends with a dot, append the default extension.
+  if (lastDotIndex === -1 || lastDotIndex === 0 || finalFilename.endsWith('.')) {
+    finalFilename = `${finalFilename}.${defaultExtension}`;
+  }
+  // Otherwise, assume the user provided the extension correctly.
+
+  const file = new File([config.content], finalFilename);
   try {
     const res =
       config.overwrite && canOverwriteExisting.value
@@ -131,8 +134,8 @@ const doUpload = async () => {
     }
 
     config.content = "";
-    config.filename = "";
-    config.extension = "txt";
+    config.filename = ""; // Reset filename input
+    config.extension = "txt"; // Reset extension to default
     config.editTargetFilename = "";
     config.editDeleteKey = "";
     config.overwrite = false;
@@ -161,8 +164,10 @@ onMounted(() => textarea.value.$el.focus());
 
 const loadFile = async (file: File) => {
   if (file.size > 1024 * 1024) return;
-  config.filename = file.name?.split(".").slice(0, -1).join(".") || "";
-  config.extension = file.name?.split(".").pop() || "txt";
+  // When loading a file, parse its name and extension
+  const parts = file.name.split('.');
+  config.extension = parts.pop() || 'txt'; // Get last part as extension, default to 'txt'
+  config.filename = parts.join('.'); // Join remaining parts as filename
   config.content = await file.text();
 };
 

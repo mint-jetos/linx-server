@@ -93,7 +93,7 @@ const props = defineProps({
 const config = useConfigStore();
 const ui = useUIStore(); // Initialize ui store
 
-document.title = props.filename + " · " + config.site.site_name;
+document.title = config.site.site_name;
 
 const accessKey = ref();
 const encAccessKey = computed(() =>
@@ -144,7 +144,7 @@ const { state, isLoading, error, execute, isReady } = useAsyncState<DisplayState
     const meta = res.data;
 
     if (meta.original_name) {
-      document.title = meta.original_name + " · " + config.site.site_name;
+      document.title = config.site.site_name;
     }
 
     let mode: symbol | undefined;

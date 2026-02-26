@@ -33,7 +33,7 @@ const router = createRouter({
 
 router.beforeEach((to) => {
   if (to.name !== "File") {
-    document.title = String(to.name ?? "") + " · " + window.config.site_name;
+    document.title = window.config.site_name;
   }
 });
 
