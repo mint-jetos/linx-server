@@ -4,12 +4,17 @@
 
       <Input
         v-model="config.filename"
+        @input="config.randomFilename = false"
         placeholder="my_file.txt"
         class="w-full sm:flex-1"
         aria-label="Filename"
         :disabled="config.overwrite && canOverwriteExisting"
       />
 
+      <Label v-if="!config.site?.force_random" class="flex flex-row items-center gap-2 px-2 shrink-0 cursor-pointer">
+        <Switch v-model="config.randomFilename" />
+        <span class="text-xs whitespace-nowrap">Random</span>
+      </Label>
 
       <Tooltip v-if="canOverwriteExisting">
         <TooltipTrigger as-child>
@@ -37,9 +42,9 @@
         :options="config.site?.expiration_times"
         class="w-full sm:w-24"
       />
-      <Button type="submit" size="icon" class="shrink-0" :disabled="isSubmitDisabled">
-        <ContentPasteIcon class="text-xl" />
-        <span class="sr-only">Paste</span>
+      <Button type="button" size="icon" class="shrink-0" :disabled="isPasteButtonDisabled" @click="handlePasteButtonClick">
+        <component :is="computedButtonIcon" class="text-xl" />
+        <span class="sr-only">{{ computedButtonText }}</span>
       </Button>
     </div>
 
@@ -60,6 +65,7 @@
       autocorrect="off"
       autocapitalize="off"
       spellcheck="false"
+      :disabled="isContentLocked"
     />
   </form>
 
@@ -70,11 +76,12 @@
 import { useDropZone, useEventListener, useMagicKeys } from "@vueuse/core";
 import { isAxiosError } from "axios";
 import { computed, onMounted, ref, watch } from "vue";
-import { useRouter } from "vue-router";
 import { toast } from "vue-sonner";
 import { Alert, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Toggle } from "@/components/ui/toggle";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -86,16 +93,36 @@ import { useUploadStore } from "@/stores/upload.ts";
 import ContentPasteIcon from "~icons/material-symbols/content-paste-rounded";
 import InfoIcon from "~icons/material-symbols/info-rounded";
 import PublishedChangesIcon from "~icons/material-symbols/published-with-changes-rounded";
+import EditIcon from "~icons/material-symbols/edit-rounded"; // Import EditIcon
 
 const config = useConfigStore();
 const upload = useUploadStore();
-const router = useRouter();
 const showAuth = ref(false);
+const isContentLocked = ref(false); // New state variable
+const currentGeneratedFilename = ref(''); // New state variable
 const canOverwriteExisting = computed(() => !!config.editTargetFilename && !!config.editDeleteKey);
 
-const isSubmitDisabled = computed(() => {
-  return !config.content;
+const isPasteButtonDisabled = computed(() => {
+  if (isContentLocked.value) { // In Edit mode, button is always enabled to switch back
+    return false;
+  }
+  return !config.content; // In Paste mode, disabled if content is empty
 });
+
+const computedButtonIcon = computed(() => isContentLocked.value ? EditIcon : ContentPasteIcon);
+const computedButtonText = computed(() => isContentLocked.value ? 'Edit' : 'Paste');
+
+const handlePasteButtonClick = async () => {
+  if (isContentLocked.value) { // If currently in 'Edit' mode
+    isContentLocked.value = false; // Unlock textarea
+    // Optional: focus textarea
+    if (textarea.value) {
+      textarea.value.$el.focus();
+    }
+  } else { // If currently in 'Paste' mode
+    await doUpload();
+  }
+};
 
 const doUpload = async () => {
   let finalFilename = config.filename;
@@ -118,13 +145,12 @@ const doUpload = async () => {
             deleteKey: config.editDeleteKey,
             expiry: config.expiry,
             password: config.password,
-            saveOriginalName: false,
           })
         : await upload.uploadFile({
             file,
+            randomFilename: config.randomFilename,
             expiry: config.expiry,
             password: config.password,
-            saveOriginalName: false,
           });
 
     if (
@@ -137,13 +163,15 @@ const doUpload = async () => {
       });
     }
 
-    config.content = "";
-    config.filename = ""; // Reset filename input
-    config.extension = "txt"; // Reset extension to default
-    config.editTargetFilename = "";
-    config.editDeleteKey = "";
-    config.overwrite = false;
-    await router.push(`/${res.filename}`);
+    isContentLocked.value = true;
+    config.filename = res.filename; // Populate filename input
+    currentGeneratedFilename.value = res.filename;
+    config.editTargetFilename = res.filename; // Store for overwrite
+    config.editDeleteKey = res.delete_key;    // Store for overwrite
+    config.overwrite = true;                  // Default to overwrite for next action
+    // config.content remains, but textarea is disabled
+    // config.extension = "txt"; // No need to reset
+    // router.push is removed
   } catch (err) {
     console.error(err);
     if (isAxiosError(err) && err.response?.status === 401) {
@@ -172,6 +200,7 @@ const loadFile = async (file: File) => {
   const parts = file.name.split('.');
   config.extension = parts.pop() || 'txt'; // Get last part as extension, default to 'txt'
   config.filename = parts.join('.'); // Join remaining parts as filename
+  config.randomFilename = false; // Disable random filename when a name is provided
   config.content = await file.text();
 };
 
