@@ -7,7 +7,7 @@ import {
   CardContent,
   CardHeader,
 } from "@/components/ui/card/index.js";
-import { Input } from "@/components/ui/input/index.js";
+import PasswordInput from "@/components/upload/PasswordInput.vue";
 import LockIcon from "~icons/material-symbols/lock";
 import { toast } from "vue-sonner";
 
@@ -42,24 +42,27 @@ const handleLogin = async () => {
     <Card class="w-full max-w-md">
       <CardHeader class="space-y-1">
         <div class="flex justify-center mb-4">
-          <div class="p-3 rounded-full bg-primary/10 text-primary">
+          <button
+            type="button"
+            @click="handleLogin"
+            :disabled="isLoading"
+            class="p-3 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
             <LockIcon class="w-8 h-8" />
-          </div>
+          </button>
         </div>
       </CardHeader>
       <CardContent>
         <form @submit.prevent="handleLogin" class="space-y-4">
           <div class="flex items-center space-x-2">
-            <Input
+            <PasswordInput
               id="password"
               v-model="password"
-              type="password"
-              placeholder="••••••••"
+              placeholder="Password"
               required
               :disabled="isLoading"
               autofocus
               class="flex-grow"
-              @keyup.enter="handleLogin"
             />
           </div>
         </form>

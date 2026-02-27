@@ -92,6 +92,9 @@ importers:
       pinia-plugin-persistedstate:
         specifier: ^4.7.1
         version: 4.7.1(pinia@3.0.4(typescript@5.9.3)(vue@3.5.28(typescript@5.9.3)))
+      qrcode.vue:
+        specifier: ^3.8.0
+        version: 3.8.0(vue@3.5.28(typescript@5.9.3))
       reka-ui:
         specifier: ^2.8.0
         version: 2.8.0(vue@3.5.28(typescript@5.9.3))
@@ -2042,6 +2045,11 @@ packages:
   punycode@2.3.1:
     resolution: {integrity: sha512-vYt7UD1U9Wg6138shLtLOvdAu+8DsC/ilFtEVHcH+wydcSpNE20AfSOduf6MkRFahL5FY7X1oU7nKVZFtfq8Fg==}
     engines: {node: '>=6'}
+
+  qrcode.vue@3.8.0:
+    resolution: {integrity: sha512-+XKbSKvQu158zlHsJm+HObGUQM3Q+9Oq6yb2op/6lMM2gwOiiG9uIhujvrSV5UoTjrzR0BcNxCdW2kk7KE4NEg==}
+    peerDependencies:
+      vue: ^3.0.0
 
   quansync@0.2.11:
     resolution: {integrity: sha512-AifT7QEbW9Nri4tAwR5M/uzpBuqfZf+zwaEM/QkzEjj7NBuFD2rBuy0K3dE+8wltbezDV7JMA0WfnCPYRSYbXA==}
@@ -4116,6 +4124,10 @@ snapshots:
   proxy-from-env@1.1.0: {}
 
   punycode@2.3.1: {}
+
+  qrcode.vue@3.8.0(vue@3.5.28(typescript@5.9.3)):
+    dependencies:
+      vue: 3.5.28(typescript@5.9.3)
 
   quansync@0.2.11: {}
 

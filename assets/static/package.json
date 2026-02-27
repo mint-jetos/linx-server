@@ -42,6 +42,7 @@
     "papaparse": "^5.5.3",
     "pinia": "^3.0.4",
     "pinia-plugin-persistedstate": "^4.7.1",
+    "qrcode.vue": "^3.8.0",
     "reka-ui": "^2.8.0",
     "tailwind-merge": "^3.4.0",
     "tailwindcss": "^4.1.18",

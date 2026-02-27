@@ -60,9 +60,9 @@
                   </RouterLink>
                 </CardTitle>
 
-                <Dialog>
-                  <CardAction v-if="smAndLarger">
-                    <ButtonGroup>
+                <CardAction v-if="smAndLarger">
+                  <ButtonGroup>
+                    <Dialog>
                       <Tooltip>
                         <DialogTrigger as-child>
                           <TooltipTrigger as-child>
@@ -74,56 +74,85 @@
                           <TooltipContent>Info</TooltipContent>
                         </DialogTrigger>
                       </Tooltip>
-                      <Tooltip>
-                        <TooltipTrigger as-child>
-                          <Button variant="secondary" size="icon" @click.prevent="upload.copy(item)">
-                            <span class="sr-only">Copy</span>
-                            <CopyIcon />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>Copy Link</TooltipContent>
-                      </Tooltip>
-                      <Tooltip>
-                        <TooltipTrigger as-child>
-                          <Button variant="destructive" size="icon" @click.prevent="deleteItem(item)">
-                            <span class="sr-only">Delete</span>
-                            <DeleteIcon />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>Delete</TooltipContent>
-                      </Tooltip>
-                    </ButtonGroup>
-                  </CardAction>
+                      <UploadInfo :item="item" />
+                    </Dialog>
 
-                  <CardAction v-else>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger>
-                        <Button variant="ghost" size="icon" class="rounded-full">
-                          <MoreIcon />
-                        </Button>
-                      </DropdownMenuTrigger>
-
-                      <DropdownMenuContent side="left">
+                    <Dialog>
+                      <Tooltip>
                         <DialogTrigger as-child>
-                          <DropdownMenuItem>
+                          <TooltipTrigger as-child>
+                            <Button variant="secondary" size="icon">
+                              <span class="sr-only">QR Code</span>
+                              <QrCodeIcon />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>QR Code</TooltipContent>
+                        </DialogTrigger>
+                      </Tooltip>
+                      <QRCodeDialog :url="getFullUrl(item.filename)" />
+                    </Dialog>
+
+                    <Tooltip>
+                      <TooltipTrigger as-child>
+                        <Button variant="secondary" size="icon" @click.prevent="upload.copy(item)">
+                          <span class="sr-only">Copy</span>
+                          <CopyIcon />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Copy Link</TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger as-child>
+                        <Button variant="destructive" size="icon" @click.prevent="deleteItem(item)">
+                          <span class="sr-only">Delete</span>
+                          <DeleteIcon />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Delete</TooltipContent>
+                    </Tooltip>
+                  </ButtonGroup>
+                </CardAction>
+
+                <CardAction v-else>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger>
+                      <Button variant="ghost" size="icon" class="rounded-full">
+                        <MoreIcon />
+                      </Button>
+                    </DropdownMenuTrigger>
+
+                    <DropdownMenuContent side="left">
+                      <Dialog>
+                        <DialogTrigger as-child>
+                          <DropdownMenuItem @select.prevent>
                             <InfoIcon />
                             Info
                           </DropdownMenuItem>
                         </DialogTrigger>
-                        <DropdownMenuItem @click.prevent="upload.copy(item)">
-                          <CopyIcon />
-                          Copy
-                        </DropdownMenuItem>
-                        <DropdownMenuItem @click.prevent="deleteItem(item)">
-                          <DeleteIcon />
-                          Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </CardAction>
+                        <UploadInfo :item="item" />
+                      </Dialog>
 
-                  <UploadInfo :item="item" />
-                </Dialog>
+                      <Dialog>
+                        <DialogTrigger as-child>
+                          <DropdownMenuItem @select.prevent>
+                            <QrCodeIcon />
+                            QR Code
+                          </DropdownMenuItem>
+                        </DialogTrigger>
+                        <QRCodeDialog :url="getFullUrl(item.filename)" />
+                      </Dialog>
+
+                      <DropdownMenuItem @click.prevent="upload.copy(item)">
+                        <CopyIcon />
+                        Copy
+                      </DropdownMenuItem>
+                      <DropdownMenuItem @click.prevent="deleteItem(item)">
+                        <DeleteIcon />
+                        Delete
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </CardAction>
               </div>
             </CardHeader>
           </Card>
@@ -155,6 +184,7 @@ import {
 import { Progress } from "@/components/ui/progress/index.js";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip/index.js";
 import UploadInfo from "@/components/upload/UploadInfo.vue";
+import QRCodeDialog from "@/components/upload/QRCodeDialog.vue";
 import { type InProgressItem, type UploadedItem, useUploadStore } from "@/stores/upload.ts";
 import { useConfigStore } from "@/stores/config.ts"; // Import useConfigStore
 import { formatBitsPerSecond, formatBytes } from "@/util/bytes.ts";
@@ -163,6 +193,7 @@ import CloseIcon from "~icons/material-symbols/close-rounded";
 import CopyIcon from "~icons/material-symbols/content-copy-rounded";
 import DeleteIcon from "~icons/material-symbols/delete-rounded";
 import InfoIcon from "~icons/material-symbols/info-rounded";
+import QrCodeIcon from "~icons/material-symbols/qr-code-2-rounded";
 import MoreIcon from "~icons/ic/round-more-horiz";
 
 const showAuth = defineModel<boolean>("showAuth");
