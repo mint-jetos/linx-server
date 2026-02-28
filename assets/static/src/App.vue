@@ -3,14 +3,15 @@
     <TooltipProvider>
       <header class="grid grid-cols-3 border-b bg-surface px-4 py-2 items-center">
         <div>
-          <Button variant="link" class="p-0" as-child>
+          <Button v-if="ui.isAuthenticated || (router.currentRoute.value.name !== 'File' && router.currentRoute.value.name !== 'Admin Login')" variant="link" class="p-0" as-child>
             <RouterLink to="/" @click="ui.setActiveRootView('upload')" :class="{ 'opacity-0 pointer-events-none': ui.isDeadLink }">
               <h1 class="text-2xl font-semibold">{{ config.site.site_name }}</h1>
             </RouterLink>
           </Button>
+          <h1 v-else class="text-2xl font-semibold px-4">{{ config.site.site_name }}</h1>
         </div>
 
-        <div :class="{ 'opacity-0 pointer-events-none': router.currentRoute.value.path !== '/' }" class="justify-self-center flex space-x-2">
+        <div :style="{ visibility: isRouterReady && router.currentRoute.value.path === '/' ? 'visible' : 'hidden' }" class="justify-self-center flex space-x-2">
           <Button
             variant="ghost"
             :class="{ 'bg-muted': ui.activeRootView === 'upload' }"
@@ -52,7 +53,7 @@
 
 <script setup lang="ts">
 import { useColorMode } from "@vueuse/core";
-import { computed, watch } from "vue";
+import { computed, watch, ref } from "vue";
 
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
@@ -72,6 +73,11 @@ import { useRouter } from "vue-router"; // Import useRouter
 const config = useConfigStore();
 const ui = useUIStore(); // Initialize ui store
 const router = useRouter(); // Initialize router
+const isRouterReady = ref(false);
+
+router.isReady().then(() => {
+  isRouterReady.value = true;
+});
 
 watch(
   () => router.currentRoute.value.name,

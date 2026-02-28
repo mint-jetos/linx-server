@@ -55,8 +55,8 @@ type Auth struct {
 	Basic             bool     `toml:"basic"         comment:"Allow logging in with basic auth password"`
 	File              string   `toml:"file"          comment:"Path to a file containing newline-separated scrypted auth keys"`
 	RemoteFile        string   `toml:"remote-file"   comment:"Path to a file containing newline-separated scrypted auth keys for remote uploads"`
-	AdminPassword     string   `toml:"admin-password"      comment:"Password for the /users page. If set, this will be hashed and used for authentication."`
-	AdminPasswordHash string   `toml:"admin-password-hash" comment:"SHA256 hash of the password for the /users page"`
+	AdminPassword     string   `toml:"admin-password"      comment:"Password for the /login page. If set, this will be hashed and used for authentication."`
+	AdminPasswordHash string   `toml:"admin-password-hash" comment:"SHA256 hash of the password for the /login page"`
 }
 
 type S3 struct {

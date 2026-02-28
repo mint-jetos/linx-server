@@ -14,6 +14,16 @@ import (
 
 func Delete(w http.ResponseWriter, r *http.Request) {
 	requestKey := util.TryPathUnescape(r.Header.Get("Linx-Delete-Key"))
+	if requestKey == "" {
+		if d := r.URL.Query().Get("d"); d != "" {
+			if decoded, err := util.Deobfuscate(d); err == nil {
+				requestKey = string(decoded)
+			}
+		}
+		if requestKey == "" {
+			requestKey = r.URL.Query().Get("k")
+		}
+	}
 
 	filename := chi.URLParam(r, "name")
 

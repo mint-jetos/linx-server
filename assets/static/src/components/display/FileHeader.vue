@@ -20,7 +20,7 @@
       </div>
 
       <ButtonGroup class="shrink-0 max-w-full ml-auto" v-if="isPlainText">
-        <EditButton :meta="state.meta" :content="state.content" />
+        <EditButton v-if="state.meta.authenticated" :meta="state.meta" :content="state.content" />
         <CopyButton :content="state.content" />
         <Tooltip v-if="showWrapSwitch">
           <TooltipTrigger as-child>

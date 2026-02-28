@@ -98,11 +98,25 @@ func FileServeHandler(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Disposition", util.EncodeContentDisposition("attachment", dlName))
 	}
 
-	if err := config.StorageBackend.ServeFile(fileName, w, r); err != nil {
-		slog.Error("Failed to serve file", "path", fileName, "error", err) //nolint:gosec
+	_, rc, err := config.StorageBackend.Get(r.Context(), fileName)
+	if err != nil {
+		slog.Error("Failed to get file", "path", fileName, "error", err)
 		Error(w, r, http.StatusInternalServerError)
 		return
 	}
+	defer func() {
+		_ = rc.Close()
+	}()
+
+	rsc, ok := rc.(io.ReadSeekCloser)
+	if !ok {
+		slog.Error("Backend did not return a ReadSeekCloser", "path", fileName)
+		Error(w, r, http.StatusInternalServerError)
+		return
+	}
+
+	xorRsc := &util.XorReadSeekCloser{ReadSeekCloser: rsc}
+	http.ServeContent(w, r, fileName, metadata.ModTime, xorRsc)
 }
 
 func AssetHandler(opts ...template.OptionFunc) http.HandlerFunc {

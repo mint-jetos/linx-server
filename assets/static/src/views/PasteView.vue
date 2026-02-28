@@ -146,7 +146,7 @@ const doUpload = async () => {
             expiry: config.expiry,
             password: config.password,
           })
-        : await upload.uploadFile({
+        : await upload.uploadFileWS({
             file,
             randomFilename: config.randomFilename,
             expiry: config.expiry,

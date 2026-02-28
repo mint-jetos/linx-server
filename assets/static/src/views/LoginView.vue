@@ -10,6 +10,7 @@ import {
 import PasswordInput from "@/components/upload/PasswordInput.vue";
 import LockIcon from "~icons/material-symbols/lock";
 import { toast } from "vue-sonner";
+import { obfuscate, deobfuscate } from "@/util/obfuscate.ts";
 
 
 const password = ref("");
@@ -23,14 +24,25 @@ const handleLogin = async () => {
   
   isLoading.value = true;
   const hashedPassword = CryptoJS.SHA256(password.value).toString(CryptoJS.enc.Hex);  try {
-    const response = await axios.post("/api/users/auth", { password: hashedPassword });
+    const encoded = obfuscate(hashedPassword);
+    const response = await axios.get(`/api/login/auth?d=${encodeURIComponent(encoded)}&json=true`);
     if (response.status === 200) {
-      toast.success("Login successful");
-      router.push("/");
+      const data = JSON.parse(deobfuscate(response.data));
+      if (data.message === "Login successful") {
+        toast.success("Login successful");
+        router.push("/");
+      }
     }
   } catch (error: any) {
     console.error(error);
-    toast.error(error.response?.data?.error || "Login failed");
+    let errorMsg = "Login failed";
+    if (error.response?.data) {
+      try {
+        const data = JSON.parse(deobfuscate(error.response.data));
+        errorMsg = data.error || errorMsg;
+      } catch (e) {}
+    }
+    toast.error(errorMsg);
   } finally {
     isLoading.value = false;
   }

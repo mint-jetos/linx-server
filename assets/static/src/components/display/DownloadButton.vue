@@ -3,7 +3,7 @@
     <Button
       :as="disabled ? 'button' : 'a'"
       variant="outline"
-      :href="`${meta.direct_url}?download`"
+      :href="meta.direct_url.startsWith('blob:') ? meta.direct_url : `${meta.direct_url}?download`"
       :download="meta.original_name || meta.filename"
       class="flex-1"
       v-bind="$attrs"

@@ -7,6 +7,7 @@ import (
 	"gabe565.com/linx-server/assets"
 	"gabe565.com/linx-server/internal/config"
 	"gabe565.com/linx-server/internal/expiry"
+	"gabe565.com/linx-server/internal/util"
 )
 
 type Config struct {
@@ -61,10 +62,12 @@ func ConfigBytes() ([]byte, error) {
 		}
 	}
 
-	buf.WriteString("window.config=")
-	if err := json.NewEncoder(&buf).Encode(NewConfig()); err != nil {
+	b, err := json.Marshal(NewConfig())
+	if err != nil {
 		return nil, err
 	}
-	buf.WriteByte(';')
+	buf.WriteString("window.obfuscatedConfig='")
+	buf.WriteString(util.Obfuscate(b))
+	buf.WriteString("';")
 	return buf.Bytes(), nil
 }

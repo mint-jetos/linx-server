@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	DefaultCSP    = "default-src 'self' " + defaultSrcKey + "; img-src 'self' data:; style-src 'self' 'unsafe-inline'; frame-ancestors 'none';"
+	DefaultCSP    = "default-src 'self' " + defaultSrcKey + "; img-src 'self' data: blob:; media-src 'self' blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' ws: wss:; frame-ancestors 'none';"
 	defaultSrcKey = "$DEFAULT_SRC"
 
 	cspHeader          = "Content-Security-Policy"

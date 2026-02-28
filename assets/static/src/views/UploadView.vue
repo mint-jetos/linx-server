@@ -64,7 +64,7 @@ const doUpload = async (file: File | undefined) => {
   if (!file) return;
   retryFile = undefined;
   try {
-    await uploads.uploadFile({
+    await uploads.uploadFileWS({
       file,
       randomFilename: config.randomFilename,
       expiry: config.expiry,

@@ -1,7 +1,6 @@
 package server
 
 import (
-	"bytes"
 	"encoding/json"
 	"net/http"
 	"path"
@@ -15,6 +14,7 @@ import (
 	"gabe565.com/linx-server/internal/template"
 	"gabe565.com/linx-server/internal/torrent"
 	"gabe565.com/linx-server/internal/upload"
+	"gabe565.com/linx-server/internal/util"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/httprate"
@@ -96,12 +96,17 @@ func Setup() (*chi.Mux, error) {
 			LimitBodySize(int64(config.Default.MaxSize)),
 		)
 
+		if config.Default.Auth.AdminPasswordHash != "" {
+			r.Use(handlers.AdminAuthMiddleware)
+		}
+
 		r.Post("/api/auth", func(w http.ResponseWriter, _ *http.Request) {
 			_, _ = w.Write([]byte("Authorized"))
 		})
 		r.Post("/", upload.POSTHandler)
 		r.Put("/", upload.PUTHandler) // Changed from /upload
 		r.Put("/{name}", upload.PUTHandler) // Changed from /upload/{name}
+		r.Get("/api/ws", upload.WSHandler)
 		if config.Default.RemoteUploads {
 			r.Get("/upload", upload.Remote)
 			r.Get("/upload/{name}", upload.Remote)
@@ -111,6 +116,7 @@ func Setup() (*chi.Mux, error) {
 			}
 		}
 
+		r.Get("/api/delete/{name}", handlers.Delete)
 		r.Delete("/{name}", handlers.Delete)
 	})
 
@@ -136,12 +142,15 @@ func Setup() (*chi.Mux, error) {
 
 	r.Get("/api/config", func(w http.ResponseWriter, r *http.Request) {
 		b, _ := json.Marshal(template.NewConfig())
-		http.ServeContent(w, r, "config.json", config.TimeStarted, bytes.NewReader(b))
+		obfuscated := util.Obfuscate(b)
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		http.ServeContent(w, r, "config.json", config.TimeStarted, strings.NewReader(obfuscated))
 	})
 
 	// Admin authentication routes
-	r.Get("/users", handlers.AdminAuthPage)
-	r.Post("/api/users/auth", handlers.AdminAuthAPI)
+	r.Get("/login", handlers.AdminAuthPage)
+	r.Post("/api/login/auth", handlers.AdminAuthAPI)
+	r.Get("/api/login/auth", handlers.AdminAuthAPI)
 
 
 

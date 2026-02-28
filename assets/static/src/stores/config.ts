@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
+import { deobfuscate } from "@/util/obfuscate.ts";
 
 export interface ExpirationTime {
   name: string;
@@ -19,13 +20,30 @@ export interface WindowConfig {
 declare global {
   interface Window {
     config: WindowConfig;
+    obfuscatedConfig: string;
   }
 }
 
 export const useConfigStore = defineStore(
   "config",
   () => {
-    const site = ref(window.config);
+    let initialConfig: WindowConfig;
+    try {
+      initialConfig = JSON.parse(deobfuscate(window.obfuscatedConfig));
+    } catch (err) {
+      console.error("Failed to deobfuscate config", err);
+      // Fallback to empty or window.config if exists (for dev)
+      initialConfig = window.config || {
+        site_name: "Linx",
+        site_path: "/",
+        max_size: 0,
+        force_random: false,
+        auth: false,
+        expiration_times: [],
+      };
+    }
+
+    const site = ref(initialConfig);
     const apiKey = ref("");
     const defaultExpiry =
       site.value?.expiration_times?.[site.value.expiration_times.length - 1]?.value ?? "";

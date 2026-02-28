@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"bytes"
 	"encoding/json"
 	"net/http"
 	"strconv"
@@ -24,19 +23,24 @@ type DisplayJSON struct {
 	Mimetype     string   `json:"mimetype"`
 	Language     string   `json:"language,omitzero"`
 	ArchiveFiles []string `json:"archive_files,omitzero"`
+	Authenticated bool     `json:"authenticated"`
 }
 
 func FileDisplay(w http.ResponseWriter, r *http.Request, fileName string, metadata backends.Metadata) {
 	if strings.EqualFold("application/json", r.Header.Get("Accept")) {
+		cookie, err := r.Cookie("admin_auth")
+		authenticated := err == nil && cookie.Value == "authenticated"
+
 		res := DisplayJSON{
-			OriginalName: metadata.OriginalName,
-			Filename:     fileName,
-			DirectURL:    headers.GetSelifURL(r, fileName).String(),
-			Expiry:       strconv.FormatInt(max(metadata.Expiry.Unix(), 0), 10),
-			Size:         strconv.FormatInt(metadata.Size, 10),
-			Mimetype:     metadata.Mimetype,
-			Language:     util.InferLang(fileName, metadata),
-			ArchiveFiles: metadata.ArchiveFiles,
+			OriginalName:  metadata.OriginalName,
+			Filename:      fileName,
+			DirectURL:     headers.GetSelifURL(r, fileName).String(),
+			Expiry:        strconv.FormatInt(max(metadata.Expiry.Unix(), 0), 10),
+			Size:          strconv.FormatInt(metadata.Size, 10),
+			Mimetype:      metadata.Mimetype,
+			Language:      util.InferLang(fileName, metadata),
+			ArchiveFiles:  metadata.ArchiveFiles,
+			Authenticated: authenticated,
 		}
 
 		if !config.Default.NoTorrent {
@@ -49,11 +53,12 @@ func FileDisplay(w http.ResponseWriter, r *http.Request, fileName string, metada
 			w.Header().Set("Cache-Control", "public, no-cache")
 		}
 		w.Header().Set("Vary", "Accept, Linx-Delete-Key")
-		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 		w.Header().Set("ETag", metadata.Etag())
 
 		b, _ := json.Marshal(res)
-		http.ServeContent(w, r, fileName, metadata.ModTime, bytes.NewReader(b))
+		obfuscated := util.Obfuscate(b)
+		http.ServeContent(w, r, fileName, metadata.ModTime, strings.NewReader(obfuscated))
 		return
 	}
 

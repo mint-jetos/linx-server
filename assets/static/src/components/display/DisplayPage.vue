@@ -84,6 +84,7 @@ import { ApiPath } from "@/config/api.ts";
 import { useConfigStore } from "@/stores/config.ts";
 import { useUIStore } from "@/stores/ui.ts"; // Import useUIStore
 import { getExtension, loadLanguage } from "@/util/extensions.ts";
+import { deobfuscate, xorTransform } from "@/util/obfuscate.ts";
 import SpinnerIcon from "~icons/svg-spinners/ring-resize";
 
 const props = defineProps({
@@ -111,6 +112,7 @@ type DisplayMeta = Record<string, any> & {
   direct_url: string;
   archive_files?: string[];
   expiry?: number;
+  authenticated?: boolean;
 };
 
 type DisplayState = {
@@ -141,7 +143,8 @@ const { state, isLoading, error, execute, isReady } = useAsyncState<DisplayState
       throw err;
     }
 
-    const meta = res.data;
+    const meta = JSON.parse(deobfuscate(res.data));
+    ui.isAuthenticated = !!meta.authenticated;
 
     if (meta.original_name) {
       document.title = config.site.site_name;
@@ -167,21 +170,25 @@ const { state, isLoading, error, execute, isReady } = useAsyncState<DisplayState
     }
 
     let content: string | undefined;
-    if (
-      meta.size < 512 * 1024 &&
-      (mode === Modes.TEXT || mode === Modes.MARKDOWN || mode === Modes.CSV)
-    ) {
+    let directUrl = meta.direct_url;
+
+    if (meta.size < 10 * 1024 * 1024) {
       try {
-        const res = await Promise.all([
-          axios.get(meta.direct_url, {
-            headers: { "Linx-Access-Key": encAccessKey.value },
-            responseType: "text",
-            validateStatus: (s) => s === 200,
-            withCredentials: true,
-          }),
-          loadLanguage(meta.language),
-        ]);
-        content = res[0].data;
+        const res = await axios.get(meta.direct_url, {
+          headers: { "Linx-Access-Key": encAccessKey.value },
+          responseType: "arraybuffer",
+          validateStatus: (s) => s === 200,
+          withCredentials: true,
+        });
+        const bytes = new Uint8Array(res.data);
+        const originalBytes = xorTransform(bytes, 0);
+
+        const blob = new Blob([originalBytes.buffer as ArrayBuffer], { type: meta.mimetype });
+        directUrl = URL.createObjectURL(blob);
+
+        if (mode === Modes.TEXT || mode === Modes.MARKDOWN || mode === Modes.CSV) {
+          content = new TextDecoder().decode(originalBytes);
+        }
       } catch (err) {
         console.error(err);
         const msg = err instanceof Error ? err.message : String(err);
@@ -190,8 +197,12 @@ const { state, isLoading, error, execute, isReady } = useAsyncState<DisplayState
       }
     }
 
+    if (mode === Modes.TEXT || mode === Modes.MARKDOWN || mode === Modes.CSV) {
+      await loadLanguage(meta.language);
+    }
+
     return {
-      meta,
+      meta: { ...meta, direct_url: directUrl },
       mode: mode ?? null,
       content: content ?? null,
     };
@@ -214,4 +225,9 @@ watch(isReady, (ready) => {
   }
 });
 
+watch(state, (_, oldVal) => {
+  if (oldVal?.meta?.direct_url?.startsWith("blob:")) {
+    URL.revokeObjectURL(oldVal.meta.direct_url);
+  }
+});
 </script>

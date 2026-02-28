@@ -5,6 +5,7 @@ import { reactive, ref } from "vue";
 import { toast } from "vue-sonner";
 import { ApiPath } from "@/config/api.ts";
 import { useConfigStore } from "@/stores/config.ts";
+import { deobfuscate, obfuscate, obfuscationKey, xorTransform } from "@/util/obfuscate.ts";
 
 let uploadID = 0;
 
@@ -131,6 +132,133 @@ export const useUploadStore = defineStore(
       }
     });
 
+    const uploadFileWS = async ({
+      file,
+      expiry,
+      randomFilename = false,
+      password,
+      saveOriginalName = true,
+      deleteKey,
+      filename,
+    }: {
+      file: File;
+      expiry: number | string;
+      randomFilename?: boolean;
+      password?: string;
+      saveOriginalName?: boolean;
+      deleteKey?: string;
+      filename?: string;
+    }) => {
+      const controller = new AbortController();
+      const upload: InProgressItem = {
+        original_name: file.name,
+        progress: { progress: 0, loaded: 0, total: file.size } as AxiosProgressEvent,
+        controller,
+      };
+      const id = uploadID++;
+      if (Object.keys(inProgress).length === 0) {
+        wakelock.request("screen");
+      }
+      inProgress[id] = upload;
+
+      return new Promise<UploadedItem>((resolve, reject) => {
+        const url = new URL(ApiPath("/api/ws"));
+        url.protocol = url.protocol === "https:" ? "wss:" : "ws:";
+        const ws = new WebSocket(url.toString());
+
+        controller.signal.addEventListener("abort", () => {
+          ws.close();
+          reject(new Error("canceled"));
+        });
+
+        ws.onopen = () => {
+          // 1. Send obfuscated metadata as binary
+          const metadata = JSON.stringify({
+            filename: filename || file.name,
+            size: file.size,
+            expiry: String(expiry),
+            password: password,
+            random: randomFilename,
+            delete_key: deleteKey,
+          });
+          
+          // XOR transform then Base64 encode
+          const encoded = obfuscate(metadata);
+          const encoder = new TextEncoder();
+          ws.send(encoder.encode(encoded));
+
+          // 2. Stream file content as binary chunks
+          const reader = file.stream().getReader();
+          let loaded = 0;
+          let xorOffset = 0;
+          const push = async () => {
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done) break;
+              
+              // Obfuscate the file chunk with rolling offset
+              const transformedValue = xorTransform(value, xorOffset);
+              ws.send(transformedValue);
+              xorOffset = (xorOffset + value.length) % obfuscationKey.length;
+              
+              loaded += value.length;
+              if (inProgress[id]) {
+                inProgress[id].progress = {
+                  progress: loaded / file.size,
+                  loaded,
+                  total: file.size,
+                } as AxiosProgressEvent;
+              }
+            }
+          };
+          push();
+        };
+
+        ws.onmessage = async (event) => {
+          try {
+            // Server response is now a Base64-encoded binary string (which was XORed)
+            let rawData = "";
+            if (event.data instanceof Blob) {
+              rawData = await event.data.text();
+            } else if (typeof event.data === "string") {
+              rawData = event.data;
+            } else {
+              const decoder = new TextDecoder();
+              rawData = decoder.decode(event.data);
+            }
+
+            const decodedJson = deobfuscate(rawData);
+            const data = JSON.parse(decodedJson);
+
+            if (data.type === "error" || data.error) {
+              const description = data.error || "Unknown error";
+              toast.error("Upload failed", { description });
+              reject(new Error(description));
+            } else {
+              const item = normalizeUploadResponse(data, file, saveOriginalName);
+              resolve(onUploadSuccess(item));
+            }
+          } catch (err) {
+            reject(err);
+          } finally {
+            ws.close();
+          }
+        };
+
+        ws.onerror = (err) => {
+          toast.error("WebSocket error");
+          reject(err);
+        };
+
+        ws.onclose = () => {
+          delete inProgress[id];
+          if (Object.keys(inProgress).length === 0) {
+            wakelock.release();
+          }
+        };
+      });
+    };
+
     const uploadFile = async ({
       file,
       expiry,
@@ -205,32 +333,26 @@ export const useUploadStore = defineStore(
       password?: string;
       saveOriginalName?: boolean;
     }) => {
-      return await runUploadRequest({
+      return await uploadFileWS({
         file,
+        expiry,
+        password,
         saveOriginalName,
-        request: async () =>
-          await axios.put(ApiPath(`/${encodeURIComponent(filename)}`), file, {
-            headers: {
-              Accept: "application/json",
-              "Content-Type": "application/octet-stream",
-              "Linx-Api-Key": encodeURIComponent(config.apiKey),
-              "Linx-Delete-Key": encodeURIComponent(deleteKey),
-              "Linx-Expiry": encodeURIComponent(String(expiry)),
-              "Linx-Access-Key": encodeURIComponent(password ?? ""),
-            },
-            validateStatus: (s) => s === 200,
-          }),
+        deleteKey,
+        filename,
       });
     };
 
     const deleteItem = async (upload: UploadedItem) => {
       try {
-        await axios.delete(ApiPath(`/${upload.filename}`), {
+        const metadata = upload.delete_key ?? "";
+        const encoded = obfuscate(metadata);
+
+        await axios.get(ApiPath(`/api/delete/${upload.filename}?d=${encodeURIComponent(encoded)}`), {
           validateStatus: (s) => s === 200 || s === 404,
           headers: {
             Accept: "application/json",
             "Linx-Api-Key": encodeURIComponent(config.apiKey),
-            "Linx-Delete-Key": encodeURIComponent(upload.delete_key ?? ""),
           },
         });
         uploads.value = uploads.value.filter((u) => u.filename !== upload.filename);
@@ -263,6 +385,7 @@ export const useUploadStore = defineStore(
       uploads,
       inProgress,
       uploadFile,
+      uploadFileWS,
       overwriteFile,
       deleteItem,
       removeExpired,
