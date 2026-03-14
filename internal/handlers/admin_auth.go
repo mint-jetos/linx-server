@@ -6,12 +6,19 @@ import (
 	"strings"
 
 	"gabe565.com/linx-server/internal/config"
+	"gabe565.com/linx-server/internal/headers"
 	"gabe565.com/linx-server/internal/template"
 	"gabe565.com/linx-server/internal/util"
 )
 
 // AdminAuthPage serves the HTML for the admin authentication page.
 func AdminAuthPage(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Vary", "Cookie")
+	cookie, err := r.Cookie("admin_auth")
+	if err == nil && cookie.Value == "authenticated" {
+		http.Redirect(w, r, "/", http.StatusFound)
+		return
+	}
 	ServeAsset(w, r, http.StatusOK, template.WithTitle("Login"))
 }
 
@@ -54,11 +61,13 @@ func AdminAuthAPI(w http.ResponseWriter, r *http.Request) {
 			Value:    "authenticated",
 			Path:     "/",
 			HttpOnly: true,
-			Secure:   r.URL.Scheme == "https",
+			Secure:   headers.GetSiteURL(r).Scheme == "https",
 			SameSite: http.SameSiteLaxMode,
 			MaxAge:   int(config.Default.Auth.CookieExpiry.Seconds()),
 		}
 		http.SetCookie(w, cookie)
+
+		w.Header().Set("Cache-Control", "no-store, no-cache, must-revalidate")
 
 		if strings.EqualFold("application/json", r.Header.Get("Accept")) ||
 			r.Header.Get("Content-Type") == "application/json" ||
@@ -80,6 +89,7 @@ func AdminAuthAPI(w http.ResponseWriter, r *http.Request) {
 // AdminAuthMiddleware checks for admin authentication cookie.
 func AdminAuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Add("Vary", "Cookie")
 		cookie, err := r.Cookie("admin_auth")
 		if err != nil || cookie.Value != "authenticated" {
 			// If not authenticated, redirect to the login page

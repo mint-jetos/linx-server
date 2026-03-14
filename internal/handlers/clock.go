@@ -6,6 +6,7 @@ import (
 
 // ClockHandler serves the @clock.html content, or the main application if admin authenticated.
 func ClockHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Vary", "Cookie")
 	cookie, err := r.Cookie("admin_auth")
 	if err == nil && cookie.Value == "authenticated" {
 		// If authenticated, serve the main application

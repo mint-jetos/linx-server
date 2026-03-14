@@ -52,7 +52,7 @@ func FileDisplay(w http.ResponseWriter, r *http.Request, fileName string, metada
 		} else {
 			w.Header().Set("Cache-Control", "public, no-cache")
 		}
-		w.Header().Set("Vary", "Accept, Linx-Delete-Key")
+		w.Header().Set("Vary", "Accept, Linx-Delete-Key, Cookie")
 		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 		w.Header().Set("ETag", metadata.Etag())
 
