@@ -483,7 +483,7 @@ func HandleProcessError(w http.ResponseWriter, r *http.Request, err error) {
 }
 
 func GenerateBarename() string {
-	return uniuri.NewLenChars(config.Default.RandomFilenameLength, []byte("abcdefghijklmnopqrstuvwxyz0123456789"))
+	return uniuri.NewLenChars(config.Default.RandomFilenameLength, []byte("ACDEFGHJKLMNPQRTUVWXYZ234679"))
 }
 
 //nolint:gochecknoglobals

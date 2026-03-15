@@ -32,19 +32,25 @@ RUN --mount=type=cache,target=/root/.cache \
 FROM alpine:3.23.3
 WORKDIR /data
 
+# --userns="keep-id:uid=1000,gid=1000" -v /path/to/data:/data
+
+RUN adduser -D -u 1000 ubuntu
+
 COPY --from=backend /app/linx-server /usr/bin
 
 RUN <<EOT
   set -eux
   mkdir -p /data/files
   mkdir -p /data/meta
-  chown -R 65534:65534 /data
+  chown -R 1000:1000 /data
 EOT
 
 VOLUME "/data"
 
 EXPOSE 8080
-USER nobody
+
+# Use the name you defined above or just the number 1000
+USER ubuntu
 ENV LINX_DEFAULTS=container
 ENV LINX_CONFIG=/data/config.toml
 ENTRYPOINT ["/usr/bin/linx-server"]

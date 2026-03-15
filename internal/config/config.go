@@ -94,9 +94,9 @@ func New() *Config {
 		MaxExpiry:             Duration{time.Hour},
 		UploadMaxMemory:       32 * bytefmt.MiB,
 		ForceRandomFilename:   true,
-		RandomFilenameLength:  8,
+		RandomFilenameLength:  4,
 		RandomDeleteKeyLength: 32,
-		KeepOriginalFilename:  true,
+		KeepOriginalFilename:  false,
 		CleanupEvery:          Duration{time.Hour},
 		Limit: Limit{
 			UploadMaxRequests: 5,

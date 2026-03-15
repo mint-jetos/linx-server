@@ -1,0 +1,14 @@
+name: ubuntu
+
+services:
+  site:
+    image: node.io.zyns.com/linx:latest
+    container_name: linx
+    restart: always
+    ports:
+      - "8082:8080"
+    userns_mode: "keep-id:uid=1000,gid=1000"
+    command: --config=/data/config.toml
+    volumes:
+      - /home/ubuntu/linx:/data
+      - /home/ubuntu/linx/config.toml:/data/config.toml

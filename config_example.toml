@@ -25,7 +25,7 @@ remote-uploads = false
 no-direct-agents = false
 # Force all uploads to use a random filename
 force-random-filename = true
-random-filename-length = 8
+random-filename-length = 4
 random-delete-key-length = 32
 # Download as the original filename instead of random filename
 keep-original-filename = true
