@@ -43,6 +43,14 @@ type Config struct {
 	S3     S3     `toml:"s3"     comment:"S3-compatible storage configuration"`
 	Limit  Limit  `toml:"limit"  comment:"Configure rate limits"`
 	Header Header `toml:"header" comment:"Modify request/response headers"`
+	Altcha Altcha `toml:"altcha" comment:"ALTCHA configuration"`
+}
+
+type Altcha struct {
+	Enabled   bool     `toml:"enabled"    comment:"Enable ALTCHA verification"`
+	HMACKey   string   `toml:"hmac-key"   comment:"Secret key for ALTCHA signatures"`
+	Expires   Duration `toml:"expires"    comment:"Expiration time for ALTCHA challenges"`
+	MaxNumber int      `toml:"max-number" comment:"Maximum number for ALTCHA Proof-of-Work"`
 }
 
 type TLS struct {
@@ -112,6 +120,12 @@ func New() *Config {
 		},
 		Auth: Auth{
 			AdminPasswordHash: "1aefd6bd04e7dc0ce548c105717a95be8c649e0f3d598d96e022f0bf2e4296fc", // Hash for "password"
+		},
+		Altcha: Altcha{
+			Enabled:   true,
+			HMACKey:   "b20a02d362fb01f5d2d22afda13f1068dd1c7dfbbc1eac0a2d05fd3bb087f9d5",
+			Expires:   Duration{15 * time.Minute},
+			MaxNumber: 1000000,
 		},
 	}
 	if os.Getenv("LINX_DEFAULTS") == "container" {

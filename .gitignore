@@ -29,7 +29,6 @@ _testmain.go
 *.prof
 
 linx-server
-config.toml
 /data/
 /custom_pages/
 /authfile

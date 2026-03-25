@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"gabe565.com/linx-server/assets"
 	"gabe565.com/linx-server/internal/auth/apikeys"
 	"gabe565.com/linx-server/internal/config"
 	"gabe565.com/linx-server/internal/handlers"
@@ -74,6 +75,7 @@ func Setup() (*chi.Mux, error) {
 	}))
 	r.Use(headers.AddHeaders(config.Default.Header.AddHeaders))
 
+	r.Use(handlers.AltchaMiddleware)
 	r.Use(RemoveMultipartForm)
 
 	if config.Default.Auth.File != "" {
@@ -85,6 +87,20 @@ func Setup() (*chi.Mux, error) {
 			SitePath:      config.Default.SiteURL.Path,
 		}))
 	}
+
+	// Altcha routes
+	r.Get("/api/altcha/challenge", handlers.GetAltchaChallenge)
+	r.Post("/api/altcha/verify", handlers.VerifyAltcha)
+	r.Get("/altcha.min.js", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/javascript")
+		w.Header().Set("Cache-Control", "public, max-age=86400")
+		_, _ = w.Write(assets.AltchaJS())
+	})
+	r.Get("/altcha_gatekeeper.js", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/javascript")
+		w.Header().Set("Cache-Control", "public, max-age=86400")
+		_, _ = w.Write(assets.Gatekeeper())
+	})
 
 	if len(customPages) != 0 {
 		r.Get("/api/custom_page/{name}", handlers.CustomPage(config.Default.CustomPagesPath))
@@ -151,8 +167,6 @@ func Setup() (*chi.Mux, error) {
 	r.Get("/login", handlers.AdminAuthPage)
 	r.Post("/api/login/auth", handlers.AdminAuthAPI)
 	r.Get("/api/login/auth", handlers.AdminAuthAPI)
-
-
 
 	// ClockHandler for the root path
 	r.Get("/", handlers.ClockHandler)

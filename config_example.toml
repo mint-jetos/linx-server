@@ -1,18 +1,19 @@
+# go run internal/config/generate_example/main.go
 bind = '127.0.0.1:8080'
 # Path to files directory
 files-path = 'data/files'
 # Path to metadata directory
 meta-path = 'data/meta'
-site-name = 'Linx'
+site-name = 'site'
 site-url = ''
 # Path relative to site base url where files are accessed directly
 selif-path = 'selif'
 # Maximum time to wait for requests to finish during shutdown
 graceful-shutdown = '30s'
 # Maximum upload file size
-max-size = '4 GiB'
+max-size = '25 MiB'
 # Maximum expiration time (a value of 0s means no expiry)
-max-expiry = '0s'
+max-expiry = '1h0m0s'
 # Maximum memory to buffer multipart uploads; excess is written to temp files
 upload-max-memory = '32 MiB'
 # Allow hot-linking of files
@@ -28,7 +29,7 @@ force-random-filename = true
 random-filename-length = 4
 random-delete-key-length = 32
 # Download as the original filename instead of random filename
-keep-original-filename = true
+keep-original-filename = false
 # Remove stdout output for each request
 no-logs = false
 # Disable the torrent file endpoint
@@ -52,6 +53,10 @@ custom-pages-path = ''
   file = ''
   # Path to a file containing newline-separated scrypted auth keys for remote uploads
   remote-file = ''
+  # Password for the /login page. If set, this will be hashed and used for authentication.
+  admin-password = ''
+  # SHA256 hash of the password for the /login page
+  admin-password-hash = '1aefd6bd04e7dc0ce548c105717a95be8c649e0f3d598d96e022f0bf2e4296fc'
 
 # S3-compatible storage configuration
 [s3]
@@ -76,3 +81,14 @@ custom-pages-path = ''
   referrer-policy = 'same-origin'
   file-referrer-policy = 'same-origin'
   x-frame-options = 'SAMEORIGIN'
+
+# ALTCHA configuration
+[altcha]
+  # Enable ALTCHA verification
+  enabled = true
+  # Secret key for ALTCHA signatures : openssl rand -hex 32
+  hmac-key = 'b20a02d362fb01f5d2d22afda13f1068dd1c7dfbbc1eac0a2d05fd3bb087f9d5'
+  # Expiration time for ALTCHA challenges
+  expires = '15m0s'
+  # Maximum number for ALTCHA Proof-of-Work
+  max-number = 1000000
