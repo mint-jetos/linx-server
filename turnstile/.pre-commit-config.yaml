@@ -1,0 +1,31 @@
+repos:
+  - repo: https://github.com/TekWizely/pre-commit-golang
+    rev: v1.0.0-rc.1
+    hooks:
+      - id: go-mod-tidy-repo
+      - id: golangci-lint-mod
+        args: [--fix]
+
+  - repo: local
+    hooks:
+      - id: eslint
+        name: eslint
+        entry: npm --prefix assets/static run lint
+        language: system
+        pass_filenames: false
+      - id: prettier
+        name: prettier
+        entry: npm --prefix assets/static run format
+        language: system
+        pass_filenames: false
+      - id: usage-docs
+        name: usage-docs
+        entry: go run ./internal/generate/docs
+        language: system
+        pass_filenames: false
+      - id: config-example
+        name: config-example
+        entry: go run ./internal/config/generate_example
+        language: system
+        types: [go]
+        pass_filenames: false

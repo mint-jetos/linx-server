@@ -1,0 +1,11 @@
+[Unit]
+Description=Linx Server
+After=network.target
+
+[Service]
+User=linx
+Group=linx
+ExecStart=/usr/bin/linx-server
+
+[Install]
+WantedBy=multi-user.target

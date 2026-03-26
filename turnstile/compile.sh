@@ -1,0 +1,3 @@
+go generate ./...
+go build -o linx-server .
+./linx-server

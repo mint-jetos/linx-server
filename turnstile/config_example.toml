@@ -1,0 +1,88 @@
+bind = '127.0.0.1:8080'
+# Path to files directory
+files-path = 'data/files'
+# Path to metadata directory
+meta-path = 'data/meta'
+site-name = 'site'
+site-url = ''
+# Path relative to site base url where files are accessed directly
+selif-path = 'selif'
+# Maximum time to wait for requests to finish during shutdown
+graceful-shutdown = '30s'
+# Maximum upload file size
+max-size = '25 MiB'
+# Maximum expiration time (a value of 0s means no expiry)
+max-expiry = '1h0m0s'
+# Maximum memory to buffer multipart uploads; excess is written to temp files
+upload-max-memory = '32 MiB'
+# Allow hot-linking of files
+allow-hotlink = false
+# Allow some referrers even if hot-linking is disabled.
+allow-referrers = []
+# Enable remote uploads (/upload?url=https://...)
+remote-uploads = false
+# Disable serving files directly for wget/curl user agents
+no-direct-agents = false
+# Force all uploads to use a random filename
+force-random-filename = true
+random-filename-length = 4
+random-delete-key-length = 32
+# Download as the original filename instead of random filename
+keep-original-filename = false
+# Remove stdout output for each request
+no-logs = false
+# Disable the torrent file endpoint
+no-torrent = false
+# How often to clean up expired files. A value of 0 means files will be cleaned up as they are accessed.
+cleanup-every = '1h0m0s'
+# Path to directory containing .md files to render as custom pages
+custom-pages-path = ''
+
+# TLS (HTTPS) configuration
+[tls]
+  cert = ''
+  key = ''
+
+[auth]
+  # Expiration time for access key cookies (set to 0s to use session cookies)
+  cookie-expiry = '0s'
+  # Allow logging in with basic auth password
+  basic = false
+  # Path to a file containing newline-separated scrypted auth keys
+  file = ''
+  # Path to a file containing newline-separated scrypted auth keys for remote uploads
+  remote-file = ''
+  # Password for the /login page. If set, this will be hashed and used for authentication.
+  admin-password = ''
+  # SHA256 hash of the password for the /login page
+  admin-password-hash = '1aefd6bd04e7dc0ce548c105717a95be8c649e0f3d598d96e022f0bf2e4296fc'
+
+# Cloudflare Turnstile configuration
+[turnstile]
+  enabled = false
+  site-key = ''
+  secret-key = ''
+
+# S3-compatible storage configuration
+[s3]
+  endpoint = ''
+  region = ''
+  bucket = ''
+  # Force path-style addressing for S3 (e.g. https://s3.amazonaws.com/linx/example.txt)
+  force-path-style = false
+
+# Configure rate limits
+[limit]
+  upload-max-requests = 5
+  upload-interval = '15s'
+  file-max-requests = 20
+  file-interval = '10s'
+
+# Modify request/response headers
+[header]
+  # Use X-Real-IP/X-Forwarded-For headers
+  real-ip = false
+  add-headers = {}
+  referrer-policy = 'same-origin'
+  file-referrer-policy = 'same-origin'
+  x-frame-options = 'SAMEORIGIN'

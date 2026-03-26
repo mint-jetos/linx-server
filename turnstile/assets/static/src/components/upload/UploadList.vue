@@ -1,0 +1,228 @@
+<template>
+  <Card v-if="items.length" class="border-none shadow-none">
+    <CardContent class="pt-0">
+      <ul class="flex flex-col gap-2 justify-center justify-items-center">
+        <li v-for="(item, key) in items" :key="key">
+          <Card v-if="'progress' in item" class="relative py-4 overflow-hidden">
+            <CardHeader class="px-4">
+              <CardTitle class="min-w-0 wrap-break-word animate-pulse">{{
+                item.original_name
+              }}</CardTitle>
+              <CardDescription>
+                <Tooltip>
+                  <TooltipTrigger class="flex gap-3 items-center tabular-nums">
+                    <strong>{{ Math.round((item.progress.progress ?? 0) * 100) }}%</strong>
+                    <span v-if="item.progress.estimated" class="before:content-['·'] before:pr-3">
+                      {{ formatDuration(item.progress.estimated) }}
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent class="flex flex-col items-center tabular-nums">
+                    <span v-if="item.progress.loaded && item.progress.total">
+                      {{ formatBytes(item.progress.loaded, 1) }} /
+                      {{ formatBytes(item.progress.total, 1) }}
+                    </span>
+                    <span v-if="item.progress.rate">
+                      {{ formatBitsPerSecond(item.progress.rate) }}
+                    </span>
+                  </TooltipContent>
+                </Tooltip>
+              </CardDescription>
+              <CardAction>
+                <Tooltip>
+                  <TooltipTrigger as-child>
+                    <Button
+                      variant="secondary"
+                      size="icon"
+                      @click.prevent="item.controller.abort()"
+                      class="w-18"
+                    >
+                      <span class="sr-only">Cancel</span>
+                      <CloseIcon />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Cancel</TooltipContent>
+                </Tooltip>
+              </CardAction>
+            </CardHeader>
+            <Progress
+              v-if="'progress' in item"
+              :model-value="(item.progress.progress ?? 0) * 100"
+              class="absolute bottom-0 left-0 rounded-none animate-pulse"
+            />
+          </Card>
+
+          <Card v-else class="py-2">
+            <CardHeader class="px-2">
+              <div class="flex items-center justify-between">
+                <CardTitle class="min-w-0">
+                  <RouterLink :to="`/${item.filename}`" class="wrap-break-word link">
+                    {{ getFullUrl(item.filename) }}
+                  </RouterLink>
+                </CardTitle>
+
+                <CardAction v-if="smAndLarger">
+                  <ButtonGroup>
+                    <Dialog>
+                      <Tooltip>
+                        <DialogTrigger as-child>
+                          <TooltipTrigger as-child>
+                            <Button variant="secondary" size="icon">
+                              <span class="sr-only">Info</span>
+                              <InfoIcon />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>Info</TooltipContent>
+                        </DialogTrigger>
+                      </Tooltip>
+                      <UploadInfo :item="item" />
+                    </Dialog>
+
+                    <Dialog>
+                      <Tooltip>
+                        <DialogTrigger as-child>
+                          <TooltipTrigger as-child>
+                            <Button variant="secondary" size="icon">
+                              <span class="sr-only">QR Code</span>
+                              <QrCodeIcon />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>QR Code</TooltipContent>
+                        </DialogTrigger>
+                      </Tooltip>
+                      <QRCodeDialog :url="getFullUrl(item.filename)" />
+                    </Dialog>
+
+                    <Tooltip>
+                      <TooltipTrigger as-child>
+                        <Button variant="secondary" size="icon" @click.prevent="upload.copy(item)">
+                          <span class="sr-only">Copy</span>
+                          <CopyIcon />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Copy Link</TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger as-child>
+                        <Button variant="destructive" size="icon" @click.prevent="deleteItem(item)">
+                          <span class="sr-only">Delete</span>
+                          <DeleteIcon />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Delete</TooltipContent>
+                    </Tooltip>
+                  </ButtonGroup>
+                </CardAction>
+
+                <CardAction v-else>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger>
+                      <Button variant="ghost" size="icon" class="rounded-full">
+                        <MoreIcon />
+                      </Button>
+                    </DropdownMenuTrigger>
+
+                    <DropdownMenuContent side="left">
+                      <Dialog>
+                        <DialogTrigger as-child>
+                          <DropdownMenuItem @select.prevent>
+                            <InfoIcon />
+                            Info
+                          </DropdownMenuItem>
+                        </DialogTrigger>
+                        <UploadInfo :item="item" />
+                      </Dialog>
+
+                      <Dialog>
+                        <DialogTrigger as-child>
+                          <DropdownMenuItem @select.prevent>
+                            <QrCodeIcon />
+                            QR Code
+                          </DropdownMenuItem>
+                        </DialogTrigger>
+                        <QRCodeDialog :url="getFullUrl(item.filename)" />
+                      </Dialog>
+
+                      <DropdownMenuItem @click.prevent="upload.copy(item)">
+                        <CopyIcon />
+                        Copy
+                      </DropdownMenuItem>
+                      <DropdownMenuItem @click.prevent="deleteItem(item)">
+                        <DeleteIcon />
+                        Delete
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </CardAction>
+              </div>
+            </CardHeader>
+          </Card>
+        </li>
+      </ul>
+    </CardContent>
+  </Card>
+</template>
+
+<script setup lang="ts">
+import { breakpointsTailwind, useBreakpoints } from "@vueuse/core";
+import { isAxiosError } from "axios";
+import { computed } from "vue";
+import { ButtonGroup } from "@/components/ui/button-group";
+import { Button } from "@/components/ui/button/index.js";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+} from "@/components/ui/card/index.js";
+import { Dialog, DialogTrigger } from "@/components/ui/dialog/index.js";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu/index.js";
+import { Progress } from "@/components/ui/progress/index.js";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip/index.js";
+import UploadInfo from "@/components/upload/UploadInfo.vue";
+import QRCodeDialog from "@/components/upload/QRCodeDialog.vue";
+import { type InProgressItem, type UploadedItem, useUploadStore } from "@/stores/upload.ts";
+import { useConfigStore } from "@/stores/config.ts"; // Import useConfigStore
+import { formatBitsPerSecond, formatBytes } from "@/util/bytes.ts";
+import { formatDuration } from "@/util/time.ts";
+import CloseIcon from "~icons/material-symbols/close-rounded";
+import CopyIcon from "~icons/material-symbols/content-copy-rounded";
+import DeleteIcon from "~icons/material-symbols/delete-rounded";
+import InfoIcon from "~icons/material-symbols/info-rounded";
+import QrCodeIcon from "~icons/material-symbols/qr-code-2-rounded";
+import MoreIcon from "~icons/ic/round-more-horiz";
+
+const showAuth = defineModel<boolean>("showAuth");
+const breakpoints = useBreakpoints(breakpointsTailwind);
+const smAndLarger = breakpoints.greaterOrEqual("sm");
+const upload = useUploadStore();
+const config = useConfigStore(); // Initialize config store
+
+type Item = InProgressItem | UploadedItem;
+const items = computed<Item[]>(() => {
+  const inProg = Object.values(upload.inProgress) as InProgressItem[];
+  return (inProg as Item[]).concat(upload.uploads as Item[]);
+});
+
+const deleteItem = async (item: UploadedItem) => {
+  try {
+    await upload.deleteItem(item);
+  } catch (err) {
+    console.error(err);
+    if (isAxiosError(err) && err.response?.status === 401) {
+      showAuth.value = true;
+    } else {
+      throw err;
+    }
+  }
+};
+
+const getFullUrl = (filename: string) => {
+  const path = (config.site.site_path || "").replace(/\/$/, "");
+  return `${window.location.origin}${path}/${filename}`;
+};
+</script>

@@ -1,0 +1,77 @@
+package server
+
+import (
+	"net/http"
+	"strings"
+
+	"gabe565.com/linx-server/internal/config"
+	"gabe565.com/linx-server/internal/template"
+	"gabe565.com/linx-server/internal/util"
+)
+
+const (
+	DefaultCSP    = "default-src 'self'; script-src 'self' " + defaultSrcKey + " https://challenges.cloudflare.com; img-src 'self' data: blob:; media-src 'self' blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' ws: wss: https://challenges.cloudflare.com; frame-ancestors 'none'; frame-src https://challenges.cloudflare.com;"
+	defaultSrcKey = "$DEFAULT_SRC"
+
+	cspHeader          = "Content-Security-Policy"
+	rpHeader           = "Referrer-Policy"
+	frameOptionsHeader = "X-Frame-Options"
+)
+
+type CSPMiddleware struct {
+	h    http.Handler
+	opts Options
+}
+
+type Options struct {
+	Policy         string
+	ReferrerPolicy string
+	Frame          string
+}
+
+func (c CSPMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	// only add a CSP if one is not already set
+	if existing := w.Header().Get(cspHeader); existing == "" {
+		w.Header().Add(cspHeader, c.opts.Policy)
+	}
+
+	// only add a Referrer Policy if one is not already set
+	if existing := w.Header().Get(rpHeader); existing == "" {
+		w.Header().Add(rpHeader, c.opts.ReferrerPolicy)
+	}
+
+	w.Header().Set(frameOptionsHeader, c.opts.Frame)
+
+	c.h.ServeHTTP(w, r)
+}
+
+func NewCSPMiddleware(o Options) func(http.Handler) http.Handler {
+	fn := func(h http.Handler) http.Handler {
+		return CSPMiddleware{h, o}
+	}
+	return fn
+}
+
+func GenerateCSP() string {
+	conf, err := template.ConfigBytes()
+	if err != nil {
+		panic(err)
+	}
+
+	// Get existing subresource integrity hashes
+	scriptHashes := util.SubresourceIntegrity(conf)
+
+	// Add the hashes for the clock's inline script and the admin auth page's inline script
+	scriptHashes += " 'sha256-Hep3Yg/R4pueD08KZ3zA6GOguM36YbqS+46Z1yEpjKU=' 'sha256-8yIGnmTVwzlut2zBWAxN7TDgLdy4aF4DAd0xm7i2I9A=' 'sha256-gKxKPPLHMidUwfNvuQ/JpBfrLddGv1665Tn0N3gI6Vg=' 'sha256-pCQg5ZDSIj0u7HOTgkJSZpc0O6rO62tBbjfeWWZjuW0=' 'sha256-bK6EJ0V6xsm/W8yAox99Aj5Zuylp3Ii6BF0z8/HGlbY=' 'sha256-jsh+qq4SjlN8BznSt4BBEZ9+X35bq6w0zaYwN5TFFyI='"
+
+
+	// If Vite URL is present, add it to script-src
+	if u := config.Default.ViteURL; u != "" {
+		scriptHashes += " " + u + " ws:"
+	}
+
+	// Replace the defaultSrcKey with all the script hashes
+	csp := strings.Replace(DefaultCSP, defaultSrcKey, scriptHashes, 1)
+
+	return csp
+}
